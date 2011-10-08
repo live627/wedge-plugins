@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://fustrate.com/dev/sources/Other/package-info.xsl"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+	<id>jaybachatero:member_awards</id>
+	<name>Member Awards</name>
+	<version>2.2.3</version>
+	<type>modification</type>
+
+	<install for="2.0 RC3, 2.0 RC4, 2.0 RC5, 2.0 - 2.0.99">
+		<readme type="file" parsebbc="true">readme.txt</readme>
+		<database>install.php</database>
+		<modification format="xml" type="file">install.xml</modification>
+		<modification format="xml" type="file">install_display_template.xml</modification>
+		<create-dir name="awards" destination="$boarddir" />
+		<require-file name="ManageAwards.php" destination="$sourcedir" />
+		<require-file name="ManageAwards.template.php" destination="$themedir" />
+		<require-file name="ManageAwards.english.php" destination="$languagedir" />
+		<require-file name="ManageAwards.english-utf8.php" destination="$languagedir" />
+		<require-file name="award.gif" destination="$imagesdir" />
+		<require-file name="awards.gif" destination="$imagesdir/admin" />
+		<require-file name="awards.js" destination="$themedir/scripts" />
+		<require-dir name="awards" destination="$imagesdir" />
+	</install>
+
+	<uninstall for="2.0 RC3, 2.0 RC4, 2.0 RC5, 2.0 - 2.0.99">
+		<database>install.php</database>
+		<modification format="xml" type="file" reverse="true">install.xml</modification>
+		<modification format="xml" type="file" reverse="true">install_display_template.xml</modification>
+		<remove-file name="$sourcedir/ManageAwards.php" />
+		<remove-file name="$themedir/ManageAwards.template.php" />
+		<remove-file name="$languagedir/ManageAwards.english.php" />
+		<remove-file name="$languagedir/ManageAwards.english-utf8.php" />
+		<remove-file name="$imagesdir/award.gif" />
+		<remove-file name="$imagesdir/admin/awards.gif" />
+		<remove-file name="$themedir/scripts/awards.js" />
+		<remove-dir name="$imagesdir/awards" />
+	</uninstall>
+</package-info>

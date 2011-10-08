@@ -1,0 +1,126 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="http://fustrate.com/dev/sources/Other/modification.xsl"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+	<id>jaybachatero:member_awards</id>
+	<version>2.2.2</version>
+
+<file name="$themedir/Display.template.php">
+
+
+
+
+
+	<!-- ONLY ONE OF THE FOLLOWING TWO OPERATIONS WILL WORK! They might not even work at all! -->
+	<!-- If that happens, find something closely resembling it, and do the necessary edits yourself -->
+
+
+
+
+
+	<operation error="ignore">
+		<search position="after"><![CDATA[
+			// This shows the popular messaging icons.
+			if ($message['member']['has_messenger'] && $message['member']['can_view_profile'])
+				echo '
+								<li class="im_icons">
+									<ul>
+										', !empty($message['member']['icq']['link']) ? '<li>' . $message['member']['icq']['link'] . '</li>' : '', '
+										', !empty($message['member']['msn']['link']) ? '<li>' . $message['member']['msn']['link'] . '</li>' : '', '
+										', !empty($message['member']['aim']['link']) ? '<li>' . $message['member']['aim']['link'] . '</li>' : '', '
+										', !empty($message['member']['yim']['link']) ? '<li>' . $message['member']['yim']['link'] . '</li>' : '', '
+									</ul>
+								</li>';]]></search>
+		<add><![CDATA[
+			// Show their awards?
+			if (!empty($message['member']['awards']) && $modSettings['awards_in_post'] > 0){
+				echo '
+						<li>
+							<fieldset style="border: 1px solid black; padding: 5px;">
+								<legend>', $txt['awards'], '</legend>';
+
+				// Couldn't limit it in Load.php, so let's do it here.
+				$awards = 0;
+				foreach ($message['member']['awards'] as $award){
+					if($awards < $modSettings['awards_in_post'])
+						echo '
+								<a href="', $scripturl, $award['more'], '"><img src="', dirname($scripturl), $award['img'], '" alt="', $award['description'], '" title="', $award['description'], '" /></a> ';
+					$awards++;
+				}
+
+				echo '
+							</fieldset>
+						</li>';
+			}]]></add>
+	</operation>
+
+	<operation error="ignore">
+		<search position="after"><![CDATA[
+			// This shows the popular messaging icons.
+			if ($message['member']['has_messenger'] && $message['member']['can_view_profile'])
+				echo '
+								', !isset($context['disabled_fields']['icq']) ? $message['member']['icq']['link'] : '', '
+								', !isset($context['disabled_fields']['msn']) ? $message['member']['msn']['link'] : '', '
+								', !isset($context['disabled_fields']['aim']) ? $message['member']['aim']['link'] : '', '
+								', !isset($context['disabled_fields']['yim']) ? $message['member']['yim']['link'] : '', '
+								<br />';]]></search>
+		<add><![CDATA[
+			// Show their awards?
+			if (!empty($message['member']['awards']) && $modSettings['awards_in_post'] > 0){
+				echo '
+								<fieldset style="border: 1px solid black; padding: 5px;">
+									<legend>', $txt['awards'], '</legend>';
+
+				// Couldn't limit it in Load.php, so let's do it here.
+				$awards = 0;
+				foreach ($message['member']['awards'] as $award){
+					if($awards < $modSettings['awards_in_post'])
+						echo '
+									<a href="', $scripturl, $award['more'], '"><img src="', dirname($scripturl), $award['img'], '" alt="', $award['description'], '" title="', $award['description'], '" /></a> ';
+					$awards++;
+				}
+
+				echo '
+								</fieldset>
+								<br />';
+			}]]></add>
+	</operation>
+
+
+
+
+
+	<!-- ONLY ONE OF THE FOLLOWING TWO OPERATIONS WILL WORK! They might not even work at all! -->
+	<!-- If that happens, find something closely resembling it, and do the necessary edits yourself -->
+
+
+
+
+
+	<operation error="ignore">
+		<search position="after"><![CDATA[
+				// Since we know this person isn't a guest, you *can* message them.
+				if ($context['can_send_pm'])
+					echo '
+								<li><a href="', $scripturl, '?action=pm;sa=send;u=', $message['member']['id'], '" title="', $message['member']['online']['is_online'] ? $txt['pm_online'] : $txt['pm_offline'], '">', $settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/im_' . ($message['member']['online']['is_online'] ? 'on' : 'off') . '.gif" alt="' . ($message['member']['online']['is_online'] ? $txt['pm_online'] : $txt['pm_offline']) . '" border="0" />' : ($message['member']['online']['is_online'] ? $txt['pm_online'] : $txt['pm_offline']), '</a></li>';]]></search>
+		<add><![CDATA[
+
+				// Awards!
+				echo '
+								<li><a href="', $scripturl, '?action=profile;area=showAwards;u=', $message['member']['id'], '" title="', $txt['awards'], '">', ($settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/award.gif" alt="' . $txt['awards'] . '" title="' . $txt['awards'] . '" border="0" />' : $txt['awards']), '</a></li>';]]></add>
+	</operation>
+
+	<operation error="ignore">
+		<search position="after"><![CDATA[
+				// Since we know this person isn't a guest, you *can* message them.
+				if ($context['can_send_pm'])
+					echo '
+								<a href="', $scripturl, '?action=pm;sa=send;u=', $message['member']['id'], '" title="', $message['member']['online']['is_online'] ? $txt['pm_online'] : $txt['pm_offline'], '">', $settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/im_' . ($message['member']['online']['is_online'] ? 'on' : 'off') . '.gif" alt="' . ($message['member']['online']['is_online'] ? $txt['pm_online'] : $txt['pm_offline']) . '" border="0" />' : ($message['member']['online']['is_online'] ? $txt['pm_online'] : $txt['pm_offline']), '</a>';]]></search>
+		<add><![CDATA[
+
+				// Awards!
+				echo '
+								<a href="', $scripturl, '?action=profile;area=showAwards;u=', $message['member']['id'], '" title="', $txt['awards'], '">', ($settings['use_image_buttons'] ? '<img src="' . $settings['images_url'] . '/award.gif" alt="' . $txt['awards'] . '" title="' . $txt['awards'] . '" border="0" />' : $txt['awards']), '</a>';]]></add>
+	</operation>
+</file>
+</modification>

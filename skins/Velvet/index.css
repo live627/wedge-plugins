@@ -1,0 +1,105 @@
+
+/*!
+ * Wine (Default) skin for Wedge
+ * (c) 2011, Wedgeward (http://wedge.org)
+ */
+
+// Set a fontsize that will look the same in all browsers.
+body
+	background: #F1F1E4
+	border: 1px solid #D8D2C2
+	box-shadow: 0px 0px 8px #D8D2C2
+	color: black
+	font: 94%/150% "Trebuchet MS", "Lucida Sans", Arial, Helvetica, sans-serif
+	min-width: 960px
+	max-width: 1500px
+	margin: 0 auto
+	padding: 0
+
+#sidebar
+	border: none
+	background: none
+	width: 25%
+	.title
+		background: none
+		border-bottom: 1px solid #D8D2C2
+		color: black
+	.title2
+		font-size: 1em
+	ul
+		list-style: none
+
+#content div.frame
+	max-width: 100%
+	padding: 0
+
+#footer
+	background: white
+	border: none
+	color: black
+
+#footer a
+	color: #900
+
+a, .windowbg a, #linktree a
+	color: #900
+
+.cat final, .title final, tr.catbg td, tr.catbg th, #navi, tr.titlebg td, tr.titlebg th
+	background: #800000
+	gradient: #600000, #980000
+	border: none
+
+.wehead, section.block header, #header
+	background: #800000
+	border: none
+
+#header
+	h2
+		color: #fc9
+	h1
+		margin-top: 3em
+		font-size: 0.75em
+		a
+			text-shadow: 0px 0px 8px #999
+			color: white
+			:hover
+				text-decoration: none;
+
+#main_menu
+	padding: 0
+	line-height: 1em
+	> li
+		padding: 2px 0
+		:hover
+			background-color: #a70000
+		> .hove
+			background: none
+	.chosen
+		background-color: #a70000
+		h4, h4.hove
+			background: none;
+
+.windowbg
+	color: #000
+	background-image: none
+
+tr.windowbg td, tr.windowbg2 td, tr.approvebg td, tr.highlight2 td, thead th, .wrc
+	border: 1px solid #DDDDDD
+
+dl#feed dt
+	width: 39%
+	padding: 0 0.5em
+
+.boardstatus extends .inline-block
+	background-image: url($here/boardstatus.png)
+
+.upshrinks extends .inline-block
+	background-image: url($here/upshrinks.png)
+
+$main_font = "Trebuchet MS", sans-serif
+$post_font = $main_font
+$head_font = $main_font
+$head_bg = rgba(221, 64, 40, .66)
+$window_bg = #EAEAEA
+$window_bg2 = #F3F3F3
+$window_bg3 = #cacdd3

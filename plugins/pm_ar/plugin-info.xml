@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<plugin id="live627:pm_ar">
+	<name>Personal Message Auto Responder</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Automatically respond to incoming PMs.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<hooks>
+		<function point="personal_message" function="pm_ar_personal_message" filename="$plugindir/PMAutoResponder" />
+		<function point="profile_areas" function="pm_ar_profile_areas" filename="$plugindir/PMAutoResponder" />
+		<function point="load_permissions" function="pm_ar_load_permissions" filename="$plugindir/PMAutoResponder" />
+		<function point="illegal_guest_perms" function="pm_ar_illegal_guest_perms" filename="$plugindir/PMAutoResponder" />
+	</hooks>
+	<database>
+		<tables>
+			<table if-exists="update" name="{db_prefix}pm_ar_rules">
+				<columns>
+					<column name="id_rule" type="int" autoincrement="yes" unsigned="yes" />
+					<column name="name" type="varchar" size="80" />
+					<column name="body" type="varchar" size="4096" />
+					<column name="subject" type="varchar" size="80" />
+					<column name="criteria" type="varchar" size="4096" />
+					<column name="id_member" type="mediumint" unsigned="yes" />
+					<column name="is_or" type="enum" values="'yes','no'" />
+					<column name="save_in_outbox" type="enum" values="'yes','no'" />
+				</columns>
+				<index type="primary">
+					<field>id_rule</field>
+				</index>
+				<index>
+					<field>id_member</field>
+				</index>
+			</table>
+		</tables>
+	</database>
+</plugin>
