@@ -20,10 +20,6 @@ function live627_theme_listing()
 	$temp = cache_get_data('live627_theme_listing', 180);
 	if ($temp === null)
 	{
-		$menu_context['sections']['live627_theme_listing'] = array(
-			'id' => 'live627_theme_listing',
-			'title' => 'Switch Theme',
-		);
 		// Get all the themes...
 		$request = wesql::query('
 			SELECT id_theme AS id, value AS name
@@ -52,13 +48,17 @@ function live627_theme_listing()
 
 		cache_put_data('live627_theme_listing', $temp, 180);
 	}
+	$menu_context['sections']['live627_theme_listing'] = array(
+		'id' => 'live627_theme_listing',
+		'title' => 'Switch Theme',
+	);
 	foreach ($temp as $theme_id => $theme_data)
 	{
 		$theme_data[count($theme_data) - 1]['is_last'] = true;
 		show_skins_recursive($theme_data, $theme_data['skins'], $menu_context);
 	}
 	loadTemplate('GenericMenu');
-	loadBlock('generic_menu_dropdown', 'header', 'add');
+	wetem::add('header', 'generic_menu_dropdown');
 	$menu_context['current_section'] = '';
 	$menu_context['extra_parameters'] = '';
 	add_css('
@@ -66,6 +66,8 @@ function live627_theme_listing()
 		{
 			display: inline-block;
 			padding: 0pt;
+			margin-bottom: 0.25em;
+			min-height: 1em;
 		}
 		#header ul#amen' . ($context['max_menu_id'] > 1 ? '_' . ($context['max_menu_id'] - 1) : '') . ' ul a
 		{
@@ -74,6 +76,7 @@ function live627_theme_listing()
 		#header ul#amen' . ($context['max_menu_id'] > 1 ? '_' . ($context['max_menu_id'] - 1) : '') . ' h4
 		{
 			margin: 0;
+			color: #fff;
 		}
 		#header ul#amen' . ($context['max_menu_id'] > 1 ? '_' . ($context['max_menu_id'] - 1) : '') . ' > li
 		{
