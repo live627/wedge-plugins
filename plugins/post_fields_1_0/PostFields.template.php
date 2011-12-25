@@ -4,39 +4,14 @@ function template_edit_post_field()
 {
 	global $context, $txt, $settings, $scripturl;
 
-	// All the javascript for this page - quite a bit!
-	add_js('
-	function updateInputBoxes()
-	{
-		var curType = $("#field_type").val(), privStatus = $("#private").val();
-		$("#max_length_dt, #max_length_dd, #bbc_dt, #bbc_dd, #can_search_dt, #can_search_dd").toggle(curType == "text" || curType == "textarea");
-		$("#dimension_dt, #dimension_dd").toggle(curType == "textarea");
-		$("#options_dt, #options_dd").toggle(curType == "select" || curType == "radio");
-		$("#default_dt, #default_dd").toggle(curType == "check");
-		$("#regex_dt, #regex_dd").toggle(curType == "text");
-		$("#regex_div").toggle(curType == "text" && $("#regex").val() == "regex");
-		$("#display").attr("disabled", false);
-
-		// Cannot show this on the topic
-		if (curType == "textarea" || privStatus >= 2)
-			$("#display").attr("checked", false).attr("disabled", true);
-
-		// Able to show to guests?
-		$("#guest_access_dt, #guest_access_dd").toggle(privStatus < 2);
-	}
-	updateInputBoxes();');
-
 	add_js('
 	var startOptID = ', count($context['field']['options']), ';
-	function addOption()
-	{
-		$("#addopt").append(\'<br><input type="radio" name="default_select" value="\' + startOptID + \'" id="\' + startOptID + \'"><input type="text" name="select_option[\' + startOptID + \']" value="">\');
-		startOptID++;
-	}');
+	updateInputBoxes(true);
+	updateInputBoxes2(true);');
 
 	echo '
 	<div id="admincenter">
-		<form action="', $scripturl, '?action=admin;area=modsettings;sa=postfieldedit" method="post" accept-charset="UTF-8">
+		<form action="<URL>?action=admin;area=modsettings;sa=postfieldedit" method="post" accept-charset="UTF-8">
 			<we:cat>
 				', $context['page_title2'], '
 			</we:cat>
@@ -58,6 +33,14 @@ function template_edit_post_field()
 						</dt>
 						<dd>
 							<textarea name="description" rows="3" cols="40">', $context['field']['description'], '</textarea>
+						</dd>
+						<dt>
+							<a id="field_show_enclosed" href="', $scripturl, '?action=help;in=field_show_enclosed" onclick="return reqWin(this);" class="help" title="', $txt['help'], '"></a>
+							<strong>', $txt['custom_edit_enclose'], ':</strong>
+							<dfn>', $txt['custom_edit_enclose_desc'], '</dfn>
+						</dt>
+						<dd>
+							<textarea name="enclose" rows="10" cols="50">', $context['field']['enclose'], '</textarea>
 						</dd>
 						<dt>
 							<strong>', $txt['pf_boards'], ':</strong>
@@ -118,6 +101,14 @@ function template_edit_post_field()
 							<strong>', $txt['pf_dimension_row'], ':</strong> <input type="text" name="rows" value="', $context['field']['rows'], '" size="5" maxlength="3">
 							<strong>', $txt['pf_dimension_col'], ':</strong> <input type="text" name="cols" value="', $context['field']['cols'], '" size="5" maxlength="3">
 						</dd>
+						<dt id="size_dt">
+							<strong>', $txt['pf_size'], ':</strong>
+							<dfn>', $txt['pf_size_desc'], '</dfn>
+						</dt>
+						<dd id="size_dd">
+							<strong>', $txt['pf_size_row'], ':</strong> <input type="text" name="rows" value="', $context['field']['rows'], '" size="5" maxlength="3">
+							<strong>', $txt['pf_size_col'], ':</strong> <input type="text" name="cols" value="', $context['field']['cols'], '" size="5" maxlength="3">
+						</dd>
 						<dt id="bbc_dt">
 							<strong>', $txt['pf_bbc'], '</strong>
 						</dt>
@@ -138,7 +129,7 @@ function template_edit_post_field()
 
 	echo '
 								<span id="addopt"></span>
-								[<a href="" onclick="addOption(); return false;">', $txt['pf_options_more'], '</a>]
+								[<a href="" onclick="addOption(); return false;">', $txt['more'], '</a>]
 							</div>
 						</dd>
 						<dt id="default_dt">
@@ -152,6 +143,19 @@ function template_edit_post_field()
 				<fieldset>
 					<legend>', $txt['pf_advanced'], '</legend>
 					<dl class="settings">
+						<dt id="mask_dt">
+							<a id="custom_mask" href="', $scripturl, '?action=help;in=custom_mask" onclick="return reqWin(this);" class="help" title="', $txt['help'], '"></a>
+							<strong>', $txt['pf_mask'], ':</strong>
+							<dfn>', $txt['pf_mask_desc'], '</dfn>
+						</dt>
+						<dd id="mask_dd">
+							<select name="mask" id="field_mask" onchange="updateInputBoxes2();">
+								<option value="number"', $context['field']['type'] == 'number' ? ' selected' : '', '>', $txt['pf_mask_number'], '</option>
+								<option value="float"', $context['field']['type'] == 'float' ? ' selected' : '', '>', $txt['pf_mask_float'], '</option>
+								<option value="email"', $context['field']['type'] == 'email' ? ' selected' : '', '>', $txt['pf_mask_email'], '</option>
+								<option value="regex"', $context['field']['type'] == 'regex' ? ' selected' : '', '>', $txt['pf_mask_regex'], '</option>
+							</select>
+						</dd>
 						<dt id="regex_dt">
 							<a id="custom_regex" href="', $scripturl, '?action=help;in=custom_regex" onclick="return reqWin(this);" class="help" title="', $txt['help'], '"></a>
 							<strong>', $txt['pf_regex'], ':</strong>
@@ -165,7 +169,7 @@ function template_edit_post_field()
 							<dfn>', $txt['pf_can_search_desc'], '</dfn>
 						</dt>
 						<dd id="can_search_dd">
-							<input type="checkbox" name="searchable"', $context['field']['searchable'] ? ' checked' : '', '>
+							<input type="checkbox" name="can_search"', $context['field']['can_search'] ? ' checked' : '', '>
 						</dd>
 						<dt>
 							<strong>', $txt['pf_active'], ':</strong>
@@ -200,13 +204,16 @@ function template_edit_post_field()
 
 function template_input_post_fields()
 {
-	global $context, $scripturl, $settings, $txt;
+	global $context, $scripturl, $settings, $txt, $user_info;
 
 	if (!empty($context['fields']))
 	{
+		$fold = !empty($context['is_post_fields_collapsed']);
 		echo '
-					<we:cat>', $txt['post_fields'], '</we:cat>
-					<div class="smalltext roundframe">
+					<div id="postFieldsHeader">
+						<div id="postFieldsExpand" title="', $fold ? '+' : '-', '"></div> <strong><a href="#" id="postFieldsExpandLink">', $txt['post_fields'], '</a></strong>
+					</div>
+					<div id="postFields" class="smalltext">
 						<dl class="settings">';
 
 		foreach ($context['fields'] as $field)
@@ -222,6 +229,47 @@ function template_input_post_fields()
 		echo '
 						</dl>
 					</div>';
+
+		// Code for showing and hiding additional options.
+		if (!empty($settings['additional_options_collapsable']))
+		{
+			// If we're collapsed, hide everything now and don't trigger the animation.
+			if ($fold)
+				add_js('
+	$("#postFields").hide();');
+			else
+				add_js('
+	$("#postFieldsExpand").addClass("fold");');
+
+			add_js('
+	var oSwapAdditionalOptions = new weToggle({
+		bCurrentlyCollapsed: ', $fold ? 'true' : 'false', ',
+		aSwappableContainers: [
+			"postFields"
+		],
+		aSwapImages: [
+			{
+				sId: "postFieldsExpand",
+				altExpanded: "-",
+				altCollapsed: "+"
+			}
+		],
+		aSwapLinks: [
+			{
+				sId: "postFieldsExpandLink",
+				msgExpanded: ' . JavaScriptEscape($txt['post_fields']) . '
+			}
+		],
+		oThemeOptions: {
+			bUseThemeSettings: ' . ($user_info['is_guest'] ? 'false' : 'true') . ',
+			sOptionName: \'postFields\'
+		},
+		oCookieOptions: {
+			bUseCookie: ' . ($user_info['is_guest'] ? 'true' : 'false') . ',
+			sCookieName: \'postFields\'
+		}
+	});');
+		}
 	}
 }
 

@@ -27,6 +27,10 @@ $txt['pf_max_length_desc'] = '(0 for no limit)';
 $txt['pf_dimension'] = 'Dimensions';
 $txt['pf_dimension_row'] = 'Rows';
 $txt['pf_dimension_col'] = 'Columns';
+$txt['pf_size'] = 'Size';
+$txt['pf_size_desc'] = 'In pixels. Specify the maximum height allowed and zero autosizes the width.';
+$txt['pf_size_row'] = 'Height';
+$txt['pf_size_col'] = 'Width';
 $txt['pf_bbc'] = 'Allow BBC';
 $txt['pf_options'] = 'Options';
 $txt['pf_options_desc'] = 'Leave option box blank to remove. Radio button selects default option.';
@@ -36,9 +40,18 @@ $txt['pf_active'] = 'Active';
 $txt['pf_active_desc'] = 'This field will be turned off if unchecked.';
 $txt['pf_can_search'] = 'Searchable';
 $txt['pf_can_search_desc'] = 'Specifies if the fields can be searched.';
+$txt['pf_mask'] = 'Input Mask';
+$txt['pf_mask_desc'] = 'This validates the input supplied by the user.';
+$txt['pf_mask_number'] = 'Whole number|Scientific notation not allowed';
+$txt['pf_mask_float'] = 'Floating point integer|Decimals allowed';
+$txt['pf_mask_email'] = 'Email|Must be shorter than 255 characters';
+$txt['pf_mask_regex'] = 'Regular Expression|Experts only!';
 $txt['pf_regex'] = 'Regex';
-$txt['pf_regex_desc'] = 'This validates the input supplied by the user.';
+$txt['pf_regex_desc'] = 'Validate your own way.';
 
 $txt['pf_delete_sure'] = 'Are you sure you wish to delete this field - all related user data will be lost!';
+
+// Validation errors
+$txt['error_pf_invalid_value'] = 'The value you chose for %1$s is invalid.';
 
 ?>

@@ -1,11 +1,11 @@
 <?php
 
-function pf_admin_areas(&$admin_areas)
+function pf_admin_areas()
 {
-	global $txt;
+	global $txt, $admin_areas;
 
-	loadAddonLanguage('live627:post_fields', 'PostFields');
-	$admin_areas['addons']['areas']['modsettings']['subsections']['postfields'] = array($txt['post_fields']);
+	loadPluginLanguage('live627:post_fields', 'PostFields');
+	$admin_areas['plugins']['areas']['modsettings']['subsections']['postfields'] = array($txt['post_fields']);
 }
 
 function pf_modify_modifications(&$sub_actions)
@@ -39,6 +39,7 @@ function ListPostFields()
 				'fields' => $_POST['remove'],
 			)
 		);
+		call_hook('delete_post_fields', array($_POST['remove']));
 		redirectexit('action=admin;area=modsettings;sa=postfields');
 	}
 
@@ -72,18 +73,18 @@ function ListPostFields()
 					)
 				);
 
-			$searchable = !empty($_POST['searchable'][$field['id_field']]) ? 'yes' : 'no';
-			if ($searchable != $field['searchable'])
+			$can_search = !empty($_POST['can_search'][$field['id_field']]) ? 'yes' : 'no';
+			if ($can_search != $field['can_search'])
 				wesql::query('
 					UPDATE {db_prefix}message_fields
-					SET searchable = {string:searchable}
+					SET can_search = {string:can_search}
 					WHERE id_field = {int:field}',
 					array(
-						'searchable' => $searchable,
+						'can_search' => $can_search,
 						'field' => $field['id_field'],
 					)
 				);
-
+			call_hook('update_post_field', array($field));
 		}
 		redirectexit('action=admin;area=modsettings;sa=postfields');
 	}
@@ -175,21 +176,21 @@ function ListPostFields()
 					'reverse' => 'active',
 				),
 			),
-			'searchable' => array(
+			'can_search' => array(
 				'header' => array(
 					'value' => $txt['pf_can_search'],
 				),
 				'data' => array(
 					'function' => create_function('$rowData', '
 						global $txt;
-						$isChecked = $rowData[\'searchable\'] == \'no\' ? \'\' : \' checked\';
-						return sprintf(\'<span id="searchable_%1$s" class="color_%4$s">%3$s</span>&nbsp;<input type="checkbox" name="searchable[%1$s]" id="searchable_%1$s" value="%1$s"%2$s>\', $rowData[\'id_field\'], $isChecked, $txt[$rowData[\'searchable\']], $rowData[\'searchable\']);
+						$isChecked = $rowData[\'can_search\'] == \'no\' ? \'\' : \' checked\';
+						return sprintf(\'<span id="can_search_%1$s" class="color_%4$s">%3$s</span>&nbsp;<input type="checkbox" name="can_search[%1$s]" id="can_search_%1$s" value="%1$s"%2$s>\', $rowData[\'id_field\'], $isChecked, $txt[$rowData[\'can_search\']], $rowData[\'can_search\']);
 					'),
 					'style' => 'width: 10%; text-align: center;',
 				),
 				'sort' => array(
-					'default' => 'searchable DESC',
-					'reverse' => 'searchable',
+					'default' => 'can_search DESC',
+					'reverse' => 'can_search',
 				),
 			),
 			'modify' => array(
@@ -237,8 +238,9 @@ function ListPostFields()
 	);
 	loadSource('Subs-List');
 	createList($listOptions);
-	loadBlock('show_list');
+	wetem::load('show_list');
 	$context['default_list'] = 'pf_fields';
+	call_hook('list_post_fields', array(&$listOptions));
 	$context['header'] .= '
 	<style>
 		.color_yes
@@ -256,7 +258,7 @@ function list_getPostFields($start, $items_per_page, $sort)
 {
 	$list = array();
 	$request = wesql::query('
-		SELECT id_field, name, description, type, bbc, active, searchable
+		SELECT id_field, name, description, type, bbc, active, can_search
 		FROM {db_prefix}message_fields
 		ORDER BY {raw:sort}
 		LIMIT {int:start}, {int:items_per_page}',
@@ -282,7 +284,7 @@ function total_getPostFields()
 	while ($row = wesql::fetch_assoc($request))
 		$list[] = $row;
 	wesql::free_result($request);
-
+	call_hook('get_post_fields', array(&$list));
 	return $list;
 }
 
@@ -305,7 +307,7 @@ function get_post_fields_filtered($board)
 
 		$list[$field['id_field']] = $field;
 	}
-
+	call_hook('get_post_fields_filtered', array(&$list, $board));
 	return $list;
 }
 
@@ -329,8 +331,9 @@ function EditPostField()
 	$context[$context['admin_menu_name']]['current_subsection'] = 'postfields';
 	$context['page_title'] .= ' - ' . $txt['post_fields'] . ' - ' . ($context['fid'] ? $txt['pf_title'] : $txt['pf_add']);
 	$context['page_title2'] = $txt['post_fields'] . ' - ' . ($context['fid'] ? $txt['pf_title'] : $txt['pf_add']);
-	loadAddonTemplate('live627:post_fields', 'PostFields');
-	loadBlock('edit_post_field');
+	loadPluginTemplate('live627:post_fields', 'PostFields');
+	wetem::load('edit_post_field');
+	add_plugin_js_file('live627:post_fields', 'postfieldsadmin.js');
 
 	$request = wesql::query('
 		SELECT b.id_board, b.name AS board_name, c.name AS cat_name
@@ -351,12 +354,10 @@ function EditPostField()
 		FROM {db_prefix}membergroups
 		WHERE min_posts = {int:min_posts}
 			AND id_group != {int:mod_group}
-			AND online_color != {string:blank_string}
 		ORDER BY group_name',
 		array(
 			'min_posts' => -1,
 			'mod_group' => 3,
-			'blank_string' => '',
 		)
 	);
 	$context['groups'] = array();
@@ -390,6 +391,7 @@ function EditPostField()
 			$context['field'] = array(
 				'name' => $row['name'],
 				'description' => $row['description'],
+				'enclose' => $row['enclose'],
 				'type' => $row['type'],
 				'length' => $row['size'],
 				'rows' => $rows,
@@ -399,7 +401,8 @@ function EditPostField()
 				'default_select' => $row['type'] == 'select' || $row['type'] == 'radio' ? $row['default_value'] : '',
 				'options' => strlen($row['options']) > 1 ? explode(',', $row['options']) : array('', '', ''),
 				'active' => $row['active'] == 'yes',
-				'searchable' => $row['searchable'] == 'yes',
+				'can_search' => $row['can_search'] == 'yes',
+				'mask' => $row['mask'],
 				'regex' => $row['regex'],
 				'boards' => !empty($row['boards']) ? explode(',', $row['boards']) : array(),
 				'groups' => !empty($row['groups']) ? explode(',', $row['groups']) : array(),
@@ -413,6 +416,7 @@ function EditPostField()
 		$context['field'] = array(
 			'name' => '',
 			'description' => '',
+			'enclose' => '',
 			'type' => 'text',
 			'length' => 255,
 			'rows' => 4,
@@ -422,7 +426,8 @@ function EditPostField()
 			'default_select' => '',
 			'options' => array('', '', ''),
 			'active' => true,
-			'searchable' => false,
+			'can_search' => false,
+			'mask' => '',
 			'regex' => '',
 			'boards' => array(),
 			'groups' => array(),
@@ -440,12 +445,13 @@ function EditPostField()
 
 		$bbc = !empty($_POST['bbc']) ? 'yes' : 'no';
 		$active = !empty($_POST['active']) ? 'yes' : 'no';
-		$searchable = !empty($_POST['searchable']) ? 'yes' : 'no';
+		$can_search = !empty($_POST['can_search']) ? 'yes' : 'no';
 
+		$mask = isset($_POST['mask']) ? $_POST['mask'] : '';
 		$regex = isset($_POST['regex']) ? $_POST['regex'] : '';
 		$length = isset($_POST['length']) ? (int) $_POST['length'] : 255;
-		$groups = !empty($_POST['groups']) ? implode(',', array_keys($_POST['groups'])) : array();
-		$boards = !empty($_POST['boards']) ? implode(',', array_keys($_POST['boards'])) : array();
+		$groups = !empty($_POST['groups']) ? implode(',', array_keys($_POST['groups'])) : '';
+		$boards = !empty($_POST['boards']) ? implode(',', array_keys($_POST['boards'])) : '';
 
 		$options = '';
 		$newOptions = array();
@@ -471,49 +477,60 @@ function EditPostField()
 		if ($_POST['type'] == 'textarea')
 			$default = (int) $_POST['rows'] . ',' . (int) $_POST['cols'];
 
+		$up_col = array(
+			'name = {string:name}', ' description = {string:description}', ' enclose = {string:enclose}',
+			'`type` = {string:type}', ' size = {int:length}',
+			'options = {string:options}',
+			'active = {string:active}', ' default_value = {string:default_value}',
+			'can_search = {string:can_search}', ' bbc = {string:bbc}', ' mask = {string:mask}', ' regex = {string:regex}',
+			'groups = {string:groups}', ' boards = {string:boards}',
+		);
+		$up_data = array(
+			'length' => $length,
+			'active' => $active,
+			'can_search' => $can_search,
+			'bbc' => $bbc,
+			'current_field' => $context['fid'],
+			'name' => $_POST['name'],
+			'description' => $_POST['description'],
+			'enclose' => $_POST['enclose'],
+			'type' => $_POST['type'],
+			'options' => $options,
+			'default_value' => $default,
+			'mask' => $mask,
+			'regex' => $regex,
+			'groups' => $groups,
+			'boards' => $boards,
+		);
+		$in_col = array(
+			'name' => 'string', 'description' => 'string', 'enclose' => 'string',
+			'type' => 'string', 'size' => 'string', 'options' => 'string', 'active' => 'string', 'default_value' => 'string',
+			'can_search' => 'string', 'bbc' => 'string', 'mask' => 'string', 'regex' => 'string', 'groups' => 'string', 'boards' => 'string',
+		);
+		$in_data = array(
+			$_POST['name'], $_POST['description'], $_POST['enclose'],
+			$_POST['type'], $length, $options, $active, $default,
+			$can_search, $bbc, $mask, $regex, $groups, $boards,
+		);
+		call_hook('save_post_field', array(&$up_col, &$up_data, &$in_col, &$in_data));
+
 		if ($context['fid'])
 		{
 			wesql::query('
 				UPDATE {db_prefix}message_fields
 				SET
-					name = {string:name}, description = {string:description},
-					type = {string:type}, size = {int:length},
-					options = {string:options},
-					active = {string:active}, default_value = {string:default_value},
-					searchable = {string:searchable}, bbc = {string:bbc}, regex = {string:regex},
-					groups = {string:groups}, boards = {string:boards}
+					' . implode(',
+					', $up_col) . '
 				WHERE id_field = {int:current_field}',
-				array(
-					'length' => $length,
-					'active' => $active,
-					'searchable' => $searchable,
-					'bbc' => $bbc,
-					'current_field' => $context['fid'],
-					'name' => $_POST['name'],
-					'description' => $_POST['description'],
-					'type' => $_POST['type'],
-					'options' => $options,
-					'default_value' => $default,
-					'regex' => $regex,
-					'groups' => $groups,
-					'boards' => $boards,
-				)
+				$up_data
 			);
 		}
 		else
 		{
 			wesql::insert('',
 				'{db_prefix}message_fields',
-				array(
-					'name' => 'string', 'description' => 'string',
-					'type' => 'string', 'size' => 'string', 'options' => 'string', 'active' => 'string', 'default_value' => 'string',
-					'searchable' => 'string', 'bbc' => 'string', 'regex' => 'string', 'groups' => 'string', 'boards' => 'string',
-				),
-				array(
-					$_POST['name'], $_POST['description'],
-					$_POST['type'], $length, $options, $active, $default,
-					$searchable, $bbc, $regex, $groups, $boards,
-				),
+				$in_col,
+				$in_data,
 				array('id_field')
 			);
 		}
@@ -548,123 +565,109 @@ function EditPostField()
 				'current_field' => $context['fid'],
 			)
 		);
+		call_hook('delete_post_field', array($context['fid']));
 		redirectexit('action=admin;area=modsettings;sa=postfields');
 	}
 }
 
-function pf_load_fields()
+function pf_load_fields($fields)
 {
 	global $board, $context, $options, $user_info;
 
-	$fields = total_getPostFields();
 	$context['fields'] = array();
 	$value = '';
 	$exists = false;
 
+	if (isset($_REQUEST['msg']))
+	{
+		$request = wesql::query('
+			SELECT *
+				FROM {db_prefix}message_field_data
+				WHERE id_msg = {int:msg}
+					AND id_field IN ({array_int:field_list})',
+				array(
+					'msg' => (int) $_REQUEST['msg'],
+					'field_list' => array_keys($fields),
+			)
+		);
+		$values = array();
+		while ($row = wesql::fetch_assoc($request))
+			$values[$row['id_field']] = isset($row['value']) ? $row['value'] : '';
+		wesql::free_result($request);
+	}
 	foreach ($fields as $field)
 	{
-		$board_list = array_flip(explode(',', $field['boards']));
-		if (!isset($board_list[$board]))
-			continue;
-
-		$group_list = explode(',', $field['groups']);
-		$is_allowed = array_intersect($user_info['groups'], $group_list);
-		if (empty($is_allowed))
-			continue;
-
 		// If this was submitted already then make the value the posted version.
 		if (isset($_POST['customfield'], $_POST['customfield'][$field['id_field']]))
 		{
 			$value = westr::htmlspecialchars($_POST['customfield'][$field['id_field']]);
-			$exists = !empty($value);
 			if (in_array($field['type'], array('select', 'radio')))
 				$value = ($options = explode(',', $field['options'])) && isset($options[$value]) ? $options[$value] : '';
 		}
-
-		// HTML for the input form.
-		$output_html = $value;
-		if ($field['type'] == 'check')
-		{
-			$true = (!$exists && $field['default_value']) || $value;
-			$input_html = '<input type="checkbox" name="customfield[' . $field['id_field'] . ']"' . ($true ? ' checked' : '') . '>';
-			$output_html = $true ? $txt['yes'] : $txt['no'];
-		}
-		elseif ($field['type'] == 'select')
-		{
-			$input_html = '<select name="customfield[' . $field['id_field'] . ']"><option value="-1"></option>';
-			$foptions = explode(',', $field['options']);
-			foreach ($foptions as $k => $v)
-			{
-				$true = (!$exists && $field['default_value'] == $v) || $value == $v;
-				$input_html .= '<option value="' . $k . '"' . ($true ? ' selected' : '') . '>' . $v . '</option>';
-				if ($true)
-					$output_html = $v;
-			}
-
-			$input_html .= '</select>';
-		}
-		elseif ($field['type'] == 'radio')
-		{
-			$input_html = '<fieldset>';
-			$foptions = explode(',', $field['options']);
-			foreach ($foptions as $k => $v)
-			{
-				$true = (!$exists && $field['default_value'] == $v) || $value == $v;
-				$input_html .= '<label><input type="radio" name="customfield[' . $field['id_field'] . ']" value="' . $k . '"' . ($true ? ' checked' : '') . '> ' . $v . '</label><br>';
-				if ($true)
-					$output_html = $v;
-			}
-			$input_html .= '</fieldset>';
-		}
-		elseif ($field['type'] == 'text')
-		{
-			$input_html = '<input type="text" name="customfield[' . $field['id_field'] . ']" ' . ($field['size'] != 0 ? 'maxsize="' . $field['size'] . '"' : '') . ' size="' . ($field['size'] == 0 || $field['size'] >= 50 ? 50 : ($field['size'] > 30 ? 30 : ($field['size'] > 10 ? 20 : 10))) . '" value="' . $value . '">';
-		}
-		else
-		{
-			@list ($fields, $cols) = @explode(',', $field['default_value']);
-			$input_html = '<textarea name="customfield[' . $field['id_field'] . ']" ' . (!empty($fields) ? 'fields="' . $fields . '"' : '') . ' ' . (!empty($cols) ? 'cols="' . $cols . '"' : '') . '>' . $value . '</textarea>';
-		}
-
-		// Parse BBCode
-		if ($field['bbc'])
-			$output_html = parse_bbc($output_html);
-		// Allow for newlines at least
-		elseif ($field['type'] == 'textarea')
-			$output_html = strtr($output_html, array("\n" => '<br>'));
-
-		// Enclosing the user input within some other text?
-		if (!empty($field['enclose']) && !empty($output_html))
-			$output_html = strtr($field['enclose'], array(
-				'{SCRIPTURL}' => $scripturl,
-				'{IMAGES_URL}' => $settings['images_url'],
-				'{DEFAULT_IMAGES_URL}' => $settings['default_images_url'],
-				'{INPUT}' => $output_html,
-			));
-
-		$context['fields'][] = array(
-			'name' => $field['name'],
-			'description' => $field['description'],
-			'type' => $field['type'],
-			'input_html' => $input_html,
-			'output_html' => $output_html,
-			'id_field' => $field['id_field'],
-			'value' => $value,
-		);
+		if (isset($values[$field['id_field']]))
+			$value = $values[$field['id_field']];
+		$exists = !empty($value);
+		$context['fields'][] = rennder_field($field, $value, $exists);
 	}
 }
 
-function pf_post()
+function rennder_field($field, $value, $exists)
 {
-	global $board, $context, $options, $user_info;
+	global $scripturl, $settings;
 
-	pf_load_fields();
+	loadPluginSource('live627:post_fields', 'Class-PostFields');
+	$class_name = 'postFields_' . $field['type'];
+	if (!class_exists($class_name))
+		fatal_error('Param "' . $field['type'] . '" not found', false);
+
+	$param = new $class_name($field, $value, $exists);
+	$param->setHtml();
+	// Parse BBCode
+	if ($field['bbc'] == 'yes')
+		$param->output_html = parse_bbc_inline($param->output_html);
+	// Allow for newlines at least
+	elseif ($field['type'] == 'textarea')
+		$param->output_html = strtr($param->output_html, array("\n" => '<br>'));
+
+	// Enclosing the user input within some other text?
+	if (!empty($field['enclose']) && !empty($output_html))
+	{
+		$replacements = array(
+			'{SCRIPTURL}' => $scripturl,
+			'{IMAGES_URL}' => $settings['images_url'],
+			'{DEFAULT_IMAGES_URL}' => $settings['default_images_url'],
+			'{INPUT}' => $param->output_html,
+		);
+		call_hook('enclose_post_field', array($field['id_field'], &$field['enclose'], &$replacements));
+		$param->output_html = strtr($field['enclose'], $replacements);
+	}
+
+	return array(
+		'name' => $field['name'],
+		'description' => $field['description'],
+		'type' => $field['type'],
+		'input_html' => $param->input_html,
+		'output_html' => $param->getOutputHtml(),
+		'id_field' => $field['id_field'],
+		'value' => $value,
+	);
+}
+
+function pf_post_form()
+{
+	global $board, $context, $options, $settings, $user_info;
+
+	pf_load_fields(get_post_fields_filtered($board));
 	if (!empty($context['fields']))
 	{
-		loadAddonLanguage('live627:post_fields', 'PostFields');
-		loadAddonTemplate('live627:post_fields', 'PostFields');
-		//loadBlock('input_post_fields', '', 'after');
-		$context['is_topic_fields_collapsed'] = $user_info['is_guest'] ? !empty($_COOKIE['topicFields']) : !empty($options['topicFields']);
+		loadPluginLanguage('live627:post_fields', 'PostFields');
+		loadPluginTemplate('live627:post_fields', 'PostFields');
+		$context['css_main_files'][] = 'postfields';
+		$context['skin_folders'][] = array($context['plugins_dir']['live627:post_fields'] . '/', 'live627:post_fields_');
+		$settings['live627:post_fields_url'] = $context['plugins_dir']['live627:post_fields'];
+		wetem::after('post_additional_options', 'input_post_fields');
+		add_plugin_js_file('live627:post_fields', 'postfields.js');
+		$context['is_post_fields_collapsed'] = $user_info['is_guest'] ? !empty($_COOKIE['postFields']) : !empty($options['postFields']);
 	}
 }
 
@@ -672,55 +675,18 @@ function pf_after(&$msgOptions)
 {
 	global $board, $context, $user_info, $modSettings;
 
-	if (isset($_POST['customfield']))
-		$_POST['customfield'] = htmlspecialchars__recursive($_POST['customfield']);
-
-	$fields = total_getPostFields();
+	$field_list = get_post_fields_filtered($board);
 	$changes = array();
 	$log_changes = array();
-	foreach ($fields as $field)
+	foreach ($field_list as $field)
 	{
-		$board_list = array_flip(explode(',', $field['boards']));
-		if (!isset($board_list[$board]))
-			continue;
+		$value = isset($_POST['customfield'][$field['id_field']]) ? $_POST['customfield'][$field['id_field']] : '';
+		$class_name = 'postFields_' . $field['type'];
+		if (!class_exists($class_name))
+			fatal_error('Param "' . $field['type'] . '" not found', false);
 
-		$group_list = explode(',', $field['groups']);
-		$is_allowed = array_intersect($user_info['groups'], $group_list);
-		if (empty($is_allowed))
-			continue;
-
-		// Validate the user data.
-		if ($field['type'] == 'check')
-			$value = isset($_POST['customfield'][$field['id_field']]) ? 1 : 0;
-		elseif ($field['type'] == 'select' || $field['type'] == 'radio')
-		{
-			$value = $field['default_value'];
-			foreach (explode(',', $field['options']) as $k => $v)
-				if (isset($_POST['customfield'][$field['id_field']]) && $_POST['customfield'][$field['id_field']] == $k)
-					$value = $v;
-		}
-		// Otherwise some form of text!
-		else
-		{
-			$value = isset($_POST['customfield'][$field['id_field']]) ? $_POST['customfield'][$field['id_field']] : '';
-			if ($field['length'])
-				$value = westr::substr($value, 0, $field['length']);
-
-			// Any masks?
-			if ($field['type'] == 'text' && !empty($field['mask']) && $field['mask'] != 'none')
-			{
-				//!!! We never error on this - just ignore it at the moment...
-				if ($field['mask'] == 'email' && (!is_valid_email($value) || strlen($value) > 255))
-					$value = '';
-				elseif ($field['mask'] == 'number')
-				{
-					$value = (int) $value;
-				}
-				elseif (substr($field['mask'], 0, 5) == 'regex' && preg_match(substr($field['mask'], 5), $value) === 0)
-					$value = '';
-			}
-		}
-		$changes[] = array($field['id_field'], $value, $msgOptions['id']);
+		$type = new $class_name($field, $value, !empty($value));
+		$changes[] = array($field['id_field'], $type->getValue(), $msgOptions['id']);
 	}
 
 	if (!empty($changes))
@@ -732,11 +698,39 @@ function pf_after(&$msgOptions)
 		);
 }
 
-function pf_pre_load_posts(&$messages)
+function pf_post_post_validate(&$post_errors, &$posterIsGuest)
+{
+	global $board, $context, $user_info, $modSettings;
+
+	if (isset($_POST['customfield']))
+		$_POST['customfield'] = htmlspecialchars__recursive($_POST['customfield']);
+
+	$field_list = get_post_fields_filtered($board);
+	loadPluginSource('live627:post_fields', 'Class-PostFields');
+	loadPluginLanguage('live627:post_fields', 'PostFields');
+	foreach ($field_list as $field)
+	{
+		$value = isset($_POST['customfield'][$field['id_field']]) ? $_POST['customfield'][$field['id_field']] : '';
+		$class_name = 'postFields_' . $field['type'];
+		if (!class_exists($class_name))
+			fatal_error('Param "' . $field['type'] . '" not found', false);
+
+		$type = new $class_name($field, $value, !empty($value));
+		$type->validate();
+		if (false !== ($err = $type->getError()))
+			$post_errors[] = $err;
+	}
+}
+
+function pf_display_message_list(&$messages, &$times, &$all_posters)
 {
 	global $board, $context, $options, $user_info;
 
 	$field_list = get_post_fields_filtered($board);
+
+	if (empty($field))
+		return;
+
 	$request = wesql::query('
 		SELECT *
 			FROM {db_prefix}message_field_data
@@ -750,86 +744,16 @@ function pf_pre_load_posts(&$messages)
 	$context['fields'] = array();
 	while ($row = wesql::fetch_assoc($request))
 	{
-		// Shortcut.
 		$exists = isset($row['value']);
 		$value = $exists ? $row['value'] : '';
 
-		// HTML for the input form.
-		$output_html = $value;
-		if ($field_list[$row['id_field']]['type'] == 'check')
-		{
-			$true = (!$exists && $field_list[$row['id_field']]['default_value']) || $value;
-			$input_html = '<input type="checkbox" name="customfield[' . $row['id_field'] . ']"' . ($true ? ' checked' : '') . '>';
-			$output_html = $true ? $txt['yes'] : $txt['no'];
-		}
-		elseif ($field_list[$row['id_field']]['type'] == 'select')
-		{
-			$input_html = '<select name="customfield[' . $row['id_field'] . ']"><option value="-1"></option>';
-			$options = explode(',', $field_list[$row['id_field']]['options']);
-			foreach ($options as $k => $v)
-			{
-				$true = (!$exists && $field_list[$row['id_field']]['default_value'] == $v) || $value == $v;
-				$input_html .= '<option value="' . $k . '"' . ($true ? ' selected' : '') . '>' . $v . '</option>';
-				if ($true)
-					$output_html = $v;
-			}
-
-			$input_html .= '</select>';
-		}
-		elseif ($field_list[$row['id_field']]['type'] == 'radio')
-		{
-			$input_html = '<fieldset>';
-			$options = explode(',', $field_list[$row['id_field']]['options']);
-			foreach ($options as $k => $v)
-			{
-				$true = (!$exists && $field_list[$row['id_field']]['default_value'] == $v) || $value == $v;
-				$input_html .= '<label><input type="radio" name="customfield[' . $row['id_field'] . ']" value="' . $k . '"' . ($true ? ' checked' : '') . '> ' . $v . '</label><br>';
-				if ($true)
-					$output_html = $v;
-			}
-			$input_html .= '</fieldset>';
-		}
-		elseif ($field_list[$row['id_field']]['type'] == 'text')
-		{
-			$input_html = '<input type="text" name="customfield[' . $row['id_field'] . ']" ' . ($field_list[$row['id_field']]['size'] != 0 ? 'maxsize="' . $field_list[$row['id_field']]['size'] . '"' : '') . ' size="' . ($field_list[$row['id_field']]['size'] == 0 || $field_list[$row['id_field']]['size'] >= 50 ? 50 : ($field_list[$row['id_field']]['size'] > 30 ? 30 : ($field_list[$row['id_field']]['size'] > 10 ? 20 : 10))) . '" value="' . $value . '">';
-		}
-		else
-		{
-			@list ($rows, $cols) = @explode(',', $field_list[$row['id_field']]['default_value']);
-			$input_html = '<textarea name="customfield[' . $row['id_field'] . ']" ' . (!empty($rows) ? 'rows="' . $rows . '"' : '') . ' ' . (!empty($cols) ? 'cols="' . $cols . '"' : '') . '>' . $value . '</textarea>';
-		}
-
-		// Parse BBCode
-		if ($field_list[$row['id_field']]['bbc'])
-			$output_html = parse_bbc($output_html);
-		// Allow for newlines at least
-		elseif ($field_list[$row['id_field']]['type'] == 'textarea')
-			$output_html = strtr($output_html, array("\n" => '<br>'));
-
-		// Enclosing the user input within some other text?
-		if (!empty($field_list[$row['id_field']]['enclose']) && !empty($output_html))
-			$output_html = strtr($field_list[$row['id_field']]['enclose'], array(
-				'{SCRIPTURL}' => $scripturl,
-				'{IMAGES_URL}' => $settings['images_url'],
-				'{DEFAULT_IMAGES_URL}' => $settings['default_images_url'],
-				'{INPUT}' => $output_html,
-			));
-
-		$context['fields'][$row['id_msg']][] = array(
-			'name' => $field_list[$row['id_field']]['name'],
-			'description' => $field_list[$row['id_field']]['description'],
-			'type' => $field_list[$row['id_field']]['type'],
-			'input_html' => $input_html,
-			'output_html' => $output_html,
-			'id_field' => $row['id_field'],
-			'value' => $value,
-		);
+		$context['fields'][$row['id_msg']][] = rennder_field($field_list[$row['id_field']], $value, $exists);
 	}
 	wesql::free_result($request);
 	if (!empty($context['fields']))
 	{
-		loadAddonLanguage('live627:post_fields', 'PostFields');
-		loadAddonTemplate('live627:post_fields', 'PostFields');
+		loadPluginLanguage('live627:post_fields', 'PostFields');
+		loadPluginTemplate('live627:post_fields', 'PostFields');
 	}
 }
 
@@ -851,7 +775,7 @@ function pf_display_post_done(&$counter, &$output)
 								<strong>' . $field['name'] . ': </strong><br />
 							</dt>
 							<dd>
-								' . $field['value'] . '
+								' . $field['output_html'] . '
 							</dd>';
 
 		$output['body'] .= '
