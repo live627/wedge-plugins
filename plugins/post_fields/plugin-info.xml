@@ -1,0 +1,72 @@
+<?xml version="1.0"?>
+<plugin id="live627:post_fields">
+	<name>Post Fields</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Adds custom fields to posts. Configurable per board and memebergroup.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<acp-url>action=admin;area=postfields</acp-url>
+	<hooks>
+		<function point="post_form" function="pf_post_form" filename="$plugindir/PostFields" />
+		<function point="create_post_after" function="pf_after" filename="$plugindir/PostFields" />
+		<function point="modify_post_after" function="pf_after" filename="$plugindir/PostFields" />
+		<function point="post_post_validate" function="pf_post_post_validate" filename="$plugindir/PostFields" />
+		<function point="display_message_list" function="pf_display_message_list" filename="$plugindir/PostFields" />
+		<function point="display_post_done" function="pf_display_post_done" filename="$plugindir/PostFields" />
+		<function point="admin_areas" function="pf_admin_areas" filename="$plugindir/PostFields" />
+		<provides>
+			<hook type="function">delete_post_fields</hook>
+			<hook type="function">delete_post_field</hook>
+			<hook type="function">update_post_field</hook>
+			<hook type="function">save_post_field</hook>
+			<hook type="function">list_post_fields</hook>
+			<hook type="function">get_post_fields</hook>
+			<hook type="function">get_post_fields_filtered</hook>
+			<hook type="function">enclose_post_field</hook>
+		</provides>
+	</hooks>
+	<database>
+		<tables>
+			<table if-exists="update" name="{db_prefix}message_fields">
+				<columns>
+					<column name="id_field" type="mediumint" autoincrement="yes" unsigned="yes" />
+					<column name="name" type="varchar" size="80" />
+					<column name="type" type="varchar" size="20" />
+					<column name="description" type="varchar" size="4096" />
+					<column name="enclose" type="varchar" size="4096" />
+					<column name="options" type="varchar" size="4096" />
+					<column name="size" type="smallint" unsigned="yes" />
+					<column name="default_value" type="varchar" size="255" />
+					<column name="mask" type="varchar" size="20" />
+					<column name="regex" type="varchar" size="255" />
+					<column name="boards" type="varchar" size="255" />
+					<column name="groups" type="varchar" size="255" />
+					<column name="bbc" type="enum" values="'yes','no'" />
+					<column name="can_search" type="enum" values="'yes','no'" />
+					<column name="active" type="enum" values="'yes','no'" />
+					<column name="required" type="enum" values="'yes','no'" />
+					<column name="eval" type="enum" values="'yes','no'" />
+					<column name="topic_only" type="enum" values="'yes','no'" />
+				</columns>
+				<index type="primary">
+					<field>id_field</field>
+				</index>
+			</table>
+			<table if-exists="update" name="{db_prefix}message_field_data">
+				<columns>
+					<column name="id_msg_field" type="mediumint" autoincrement="yes" unsigned="yes" />
+					<column name="id_field" type="mediumint" unsigned="yes" />
+					<column name="id_msg" type="int" unsigned="yes" />
+					<column name="value" type="varchar" size="4096" />
+				</columns>
+				<index type="primary">
+					<field>id_msg_field</field>
+				</index>
+				<index type="unique">
+					<field>id_field</field>
+					<field>id_msg</field>
+				</index>
+			</table>
+		</tables>
+	</database>
+</plugin>

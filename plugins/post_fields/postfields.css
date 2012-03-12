@@ -1,0 +1,3 @@
+// Add the icon to the link. I know I could add the class in the HTML, but the wecss parser kicks ass!
+#postFieldsExpand
+	base: .foldable

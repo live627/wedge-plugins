@@ -1,0 +1,17 @@
+
+.sbox .details
+	margin: 0 0 0.5em 2em
+
+.color_yes
+	color: green
+
+.color_no
+	color: red
+
+.sbox .overview > div:nth-child(2)
+	display: inline-block
+	width: 60%
+
+.sbox .overview > div:nth-child(3)
+	display: inline-block
+	width: 40%

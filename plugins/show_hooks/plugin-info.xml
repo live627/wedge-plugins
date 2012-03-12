@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<plugin id="live627:show_hooks">
+	<name>Show Hooks</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Shows hooks in use by enabled plugins.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<acp-url>action=admin;area=hooks</acp-url>
+	<hooks>
+		<function point="admin_areas" function="hooks_admin_areas" filename="$plugindir/ShowHooks" />
+	</hooks>
+</plugin>
