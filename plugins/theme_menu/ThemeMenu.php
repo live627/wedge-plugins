@@ -52,10 +52,10 @@ function live627_theme_listing()
 		'id' => 'live627_theme_listing',
 		'title' => 'Switch Theme',
 	);
-	foreach ($temp as $theme_id => $theme_data)
+	foreach ($temp as $th_id => $th_data)
 	{
-		$theme_data[count($theme_data) - 1]['is_last'] = true;
-		show_skins_recursive($theme_data, $theme_data['skins'], $menu_context);
+		$th_data[count($th_data) - 1]['is_last'] = true;
+		show_skins_recursive($th_data, $th_data['skins'], $menu_context);
 	}
 	loadTemplate('GenericMenu');
 	wetem::add('header', 'generic_menu_dropdown');
@@ -84,27 +84,28 @@ function live627_theme_listing()
 		}');
 }
 
-function show_skins_recursive($theme, $skins, &$menu_context)
+function show_skins_recursive($th, $skins, &$menu_context)
 {
-	global $context, $scripturl, $settings;
+	global $context, $scripturl, $theme;
 
 	$last = count($skins);
 	$current = 1;
 	foreach ($skins as $skin)
 	{
-		$menu_context['sections']['live627_theme_listing']['areas'][$theme['id'] . '_' . base64_encode($skin['dir'])] = array(
-			'id' => $theme['id'] . '_' . base64_encode($skin['dir']),
-			'label' => $skin['name'] . ' (' . $theme['name'] . ')',
-			'url' => $scripturl . '?theme=' . $theme['id'] . '_' . base64_encode($skin['dir']),
+		$sd = base64_encode($skin['dir']);
+		$menu_context['sections']['live627_theme_listing']['areas'][$th['id'] . '_' . $sd] = array(
+			'id' => $th['id'] . '_' . $sd,
+			'label' => $skin['name'] . ' (' . $th['name'] . ')',
+			'url' => $scripturl . '?theme=' . $th['id'] . '_' . $sd,
 			'icon' => '',
 		);
-		$is_current_skin = $context['skin'] == $skin['dir'] && $settings['theme_id'] == $theme['id'];
+		$is_current_skin = $context['skin'] == $skin['dir'] && $theme['theme_id'] == $th['id'];
 		if ($is_current_skin)
-			$menu_context['current_area'] = $theme['id'] . '_' . base64_encode($skin['dir']);
-		if ($current == $last && empty($skin['skins']) && !empty($theme['is_last']))
+			$menu_context['current_area'] = $th['id'] . '_' . $sd;
+		if ($current == $last && empty($skin['skins']) && !empty($th['is_last']))
 			$menu_context['sections']['live627_theme_listing']['areas'][] = '';
 		if (!empty($skin['skins']))
-			show_skins_recursive($theme, $skin['skins'], $menu_context);
+			show_skins_recursive($th, $skin['skins'], $menu_context);
 		$current++;
 	}
 }

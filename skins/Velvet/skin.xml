@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!--
-	See Warm/skin.xml for descriptions.
+	See Wine/Warm/skin.xml for descriptions and more options.
 -->
 <skin>
 
@@ -16,15 +16,48 @@
 		By live627. A cross between the custom theme on livemods and Wine.
 	]]></comment>
 
-	<code for="ie6" include="scripts/pngfix.js,scripts/ie6hover.js"><![CDATA[
+	<sidebar>
+		left
+	</sidebar>
+
+	<code for="ie6" include="scripts/pngfix.js scripts/ie6hover.js"><![CDATA[
 	$('input[type=checkbox], input[type=radio]').addClass('ie_check');
 	$('input[type=submit], input[type=button]').addClass('ie_button');
-	DD_belatedPNG.fix('.ping,#wedgelogo,#footer,#footer div.frame');
+	DD_belatedPNG.fix('.ping,#wedgelogo,#footer,#footer div.frame,.cat,.title');
 	$.ie6hover();
 	]]></code>
 
-	<code for="iphone"><![CDATA[
-	$('#main_content').insertBefore('#edge');
+	<skeleton>
+		<html>
+			<body>
+				<wrapper>
+					<header>
+						<logo_toggler />
+						<search_box />
+						<language_selector />
+						<random_news />
+					</header>
+					<menu />
+					<content_wrap>
+						<sidebar_wrap>
+							<sidebar></sidebar>
+						</sidebar_wrap>
+						<offside_wrap>
+							<linktree />
+							<top></top>
+							<default>
+								<main />
+							</default>
+						</offside_wrap>
+					</content_wrap>
+					<footer />
+				</wrapper>
+			</body>
+		</html>
+	</skeleton>
+
+	<code for="iphone,tablet"><![CDATA[
+	$('#sidebar').insertAfter('#main');
 	]]></code>
 
 </skin>

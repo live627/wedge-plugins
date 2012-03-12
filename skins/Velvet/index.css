@@ -1,20 +1,15 @@
-
-/*!
- * Wine (Default) skin for Wedge
- * (c) 2011, Wedgeward (http://wedge.org)
- */
-
 // Set a fontsize that will look the same in all browsers.
 body
 	background: #F1F1E4
 	border: 1px solid #D8D2C2
-	box-shadow: 0px 0px 8px #D8D2C2
 	color: black
-	font: 94%/150% "Trebuchet MS", "Lucida Sans", Arial, Helvetica, sans-serif
+	font: 94%/150% $main_font
 	min-width: 960px
 	max-width: 1500px
 	margin: 0 auto
 	padding: 0
+	> div#wedge
+		box-shadow: 0px 0px 8px #D8D2C2
 
 #sidebar
 	border: none
@@ -24,8 +19,8 @@ body
 		background: none
 		border-bottom: 1px solid #D8D2C2
 		color: black
-	.title2
-		font-size: 1em
+		font-size: 1.25em
+		font-family: "Segoe UI Light", $main_font
 	ul
 		list-style: none
 
@@ -34,7 +29,9 @@ body
 	padding: 0
 
 #footer
-	background: white
+	background: $main_bg // #F1F1E4
+	border: 1px solid #D8D2C2
+	// box-shadow: 0px 8px 8px -8px #D8D2C2 inset
 	border: none
 	color: black
 
@@ -45,12 +42,12 @@ a, .windowbg a, #linktree a
 	color: #900
 
 .cat final, .title final, tr.catbg td, tr.catbg th, #navi, tr.titlebg td, tr.titlebg th
-	background: #800000
-	gradient: #600000, #980000
+	background: $main_grad2
+	gradient: $main_grad1, #980000
 	border: none
 
 .wehead, section.block header, #header
-	background: #800000
+	background: $main_grad2
 	border: none
 
 #header
@@ -73,11 +70,20 @@ a, .windowbg a, #linktree a
 		:hover
 			background-color: #a70000
 		> .hove
-			background: none
+			background-color: transparent
 	.chosen
 		background-color: #a70000
 		h4, h4.hove
-			background: none;
+			background-color: transparent
+
+#main_content
+	padding: 0 1em
+
+.pagesection
+	padding: 0.5em 0
+
+#message_index_jump_to
+	margin: 0 1em
 
 .windowbg
 	color: #000
@@ -96,10 +102,162 @@ dl#feed dt
 .upshrinks extends .inline-block
 	background-image: url($here/upshrinks.png)
 
-$main_font = "Trebuchet MS", sans-serif
+mixin button
+	color: white
+	box-shadow: inset 0 1px 1px white, 0 3px 3px rgba(0,0,0,0.6)
+	border: 1px solid lighten($main_grad2, 40%)
+	border-radius: 18px
+	text-shadow: 0 -1px 0 rgba(0,0,0,0.3)
+	:not([class]), .button_submit
+		background-image: $button_grad
+	:hover
+		background-image: -prefix-linear-gradient(top, lighten($main_grad2, 15%), lighten($main_grad1, 15%))
+		color: white
+	:active
+		background-image: -prefix-linear-gradient(top, $main_grad2, $main_grad1)
+
+input[type=submit], input[type=button], .ie_button
+	mixin: button
+	position: relative
+	:active
+		top: 2px
+
+input.submit
+	background-image: url($images/buttons/submit.png) $bevel
+input.submit:hover
+	background-image: url($images/buttons/submit.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, lighten($main_grad2, 15%), lighten($main_grad1, 15%))
+input.submit:active
+	background-image: url($images/buttons/submit.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, $main_grad2, $main_grad1)
+
+input.save
+	background-image: url($images/buttons/save.png) $bevel
+input.save:hover
+	background-image: url($images/buttons/save.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, lighten($main_grad2, 15%), lighten($main_grad1, 15%))
+input.save:active
+	background-image: url($images/buttons/save.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, $main_grad2, $main_grad1)
+
+input.delete
+	background-image: url($images/buttons/delete.png) $bevel
+input.delete:hover
+	background-image: url($images/buttons/delete.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, lighten($main_grad2, 15%), lighten($main_grad1, 15%))
+input.delete:active
+	background-image: url($images/buttons/delete.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, $main_grad2, $main_grad1)
+
+input.new
+	background-image: url($images/buttons/new.png) $bevel
+input.new:hover
+	background-image: url($images/buttons/new.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, lighten($main_grad2, 15%), lighten($main_grad1, 15%))
+input.new:active
+	background-image: url($images/buttons/new.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, $main_grad2, $main_grad1)
+
+input.spell
+	background-image: url($images/buttons/delete.png) $bevel
+input.spell:hover
+	background-image: url($images/buttons/delete.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, lighten($main_grad2, 15%), lighten($main_grad1, 15%))
+input.spell:active
+	background-image: url($images/buttons/delete.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, $main_grad2, $main_grad1)
+
+input.search
+	background-image: url($images/buttons/filter.png) $bevel
+input.search:hover
+	background-image: url($images/buttons/filter.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, lighten($main_grad2, 15%), lighten($main_grad1, 15%))
+input.search:active
+	background-image: url($images/buttons/filter.png), url($images/theme/bevel.png), -prefix-linear-gradient(top, $main_grad2, $main_grad1)
+
+.menu:not(#main_menu) > li
+	mixin: button
+	border-radius: 0
+	border: none
+	padding: 0 8px
+	float: left
+	display: block
+	:active
+		top: 0
+	h4
+		color: white
+		padding: 0
+		a
+			color: white
+	li
+		line-height: 1.25em
+		text-shadow: none
+
+.menu:not(#main_menu) > li.chosen, .buttonlist li a.active
+	gradient: $main_grad2, $main_grad1
+	h4
+		background: none
+
+.menu:not(#main_menu) > li:first-child, .buttonlist li:first-child a
+	border-top-left-radius, border-bottom-left-radius: 18px
+
+.menu:not(#main_menu) > li:last-child, .buttonlist li:last-child a
+	border-top-right-radius, border-bottom-right-radius: 18px
+
+.menu:not(#main_menu, #context_menus)
+	min-height: 1em
+	margin-bottom: 1em
+
+#context_menus
+	min-height: 2em
+
+.buttonlist li
+	float: left
+	display: block
+	height: 2em
+	margin: 0 !important
+	a
+		background: $button_grad !important
+		color: white !important
+		box-shadow: inset 0 1px 1px white, 0 3px 3px rgba(0,0,0,0.6)
+		border-radius: 0
+		border: 1px solid lighten($main_grad2, 40%)
+		text-shadow: 0 -1px 0 rgba(0,0,0,0.3)
+		padding: 0 8px !important
+		height, line-height: 1.5em
+		:hover
+			background: -prefix-linear-gradient(top, lighten($main_grad2, 15%), lighten($main_grad1, 15%)) !important
+		:active
+			background: -prefix-linear-gradient(top, $main_grad2, $main_grad1) !important
+
+#helfd
+	opacity: 0
+	-prefix-transform: scale(0, 0)
+	-prefix-transform-origin: top left
+
+#helfd.show
+	opacity: 1
+	-prefix-transform: scale(1, 1)
+
+.ani
+	-prefix-transition: all 1s ease-in-out
+
+.note
+	border-radius: 4px
+	background-color: #fb5
+	gradient: #fc3, #fa6
+	height, line-height: 9px
+	padding: 0 3px 3px
+
+
+#main_menu > li
+	padding: 3px 1px
+	h4 a
+		height: 1.1em
+	h4 .note
+		padding: 4px
+		padding-bottom: 5px
+	ul .note
+		border-radius: 6px
+
+$main_font = "Trebuchet MS", "Lucida Sans", Arial, Helvetica, sans-serif
 $post_font = $main_font
 $head_font = $main_font
 $head_bg = rgba(221, 64, 40, .66)
 $window_bg = #EAEAEA
 $window_bg2 = #F3F3F3
 $window_bg3 = #cacdd3
+$main_grad1 = #600000
+$main_grad2 = #800000
+$bevel = ", url($images/theme/bevel.png) $button_gradient"
+$button_gradient = ", $button_grad"
+$button_grad = "-prefix-linear-gradient(top, lighten($main_grad2, 30%), lighten($main_grad1, 30%))"
