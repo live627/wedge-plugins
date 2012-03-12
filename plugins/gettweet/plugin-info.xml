@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<plugin id="live627:gt">
+	<name>Get Tweets</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Gets the latest tweets.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<acp-url>action=admin;area=gettweets</acp-url>
+	<settings>
+		<setting name="gtNum" default="1" />
+	</settings>
+	<settings-page area="gettweets" icon="$pluginurl/tweet_small.png" bigicon="$pluginurl/tweet_large.png">
+		<language file="GT" />
+		<permissions name="view_tweets" />
+		<text name="gtName" />
+		<check name="gtNum" />
+		<check name="gtFadeeIn" />
+	</settings-page>
+	<actions>
+		<action action="gettweets" function="GT" filename="GT" />
+	</actions>
+	<hooks>
+		<function point="info_center" function="gt_ic" filename="$plugindir/GT" />
+	</hooks>
+</plugin>
