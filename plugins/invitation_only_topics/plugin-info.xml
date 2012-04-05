@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<plugin id="live627:invitation_only_topics">
+	<name>Invitation Only Topics</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Allows your members to restrict topics to those members they choose.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<hooks>
+		<function point="post_form" function="invitation_only_topics_post_form" filename="$plugindir/InvitationTopics" />
+		<function point="create_post_after" function="invitation_only_topics_after" filename="$plugindir/InvitationTopics" />
+		<function point="modify_post_after" function="invitation_only_topics_after" filename="$plugindir/InvitationTopics" />
+		<function point="behavior" function="invitation_only_topics_extend_db_replacement" filename="$plugindir/InvitationTopics" />
+		<function point="ssi" function="invitation_only_topics_extend_db_replacement" filename="$plugindir/InvitationTopics" />
+		<function point="display_main" function="invitation_only_topics_display_main" filename="$plugindir/InvitationTopics" />
+		<function point="load_permissions" function="invitation_only_topics_load_permissions" filename="$plugindir/InvitationTopics" />
+		<function point="illegal_guest_perms" function="invitation_only_topics_illegal_guest_perms" filename="$plugindir/InvitationTopics" />
+		<language point="lang_help" function="invitation_only_topics_lang_help" filename="$plugindir/InvitationTopics" />
+	</hooks>
+	<database>
+		<tables>
+			<table if-exists="update" name="{db_prefix}topic_invites">
+				<columns>
+					<column name="id_topic" type="mediumint" unsigned="yes" />
+					<column name="id_member_invited" type="mediumint" unsigned="yes" />
+					<column name="id_member_inviter" type="mediumint" unsigned="yes" />
+				</columns>
+				<index type="primary">
+					<field>id_topic</field>
+					<field>id_member_invited</field>
+				</index>
+				<index>
+					<field>id_member_inviter</field>
+				</index>
+			</table>
+		</tables>
+		<scripts>
+			<enable>$plugindir/enable.php</enable>
+			<remove-clean>$plugindir/removeclean.php</remove-clean>
+		</scripts>
+	</database>
+</plugin>
