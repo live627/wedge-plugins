@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<plugin id="live627:todo">
+	<name>To Do List</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Enables small lists of items for members to do.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<settings>
+		<setting name="todo_verification" default="guests" />
+	</settings>
+	<settings-page area="todo" icon="$pluginurl/todo_small.png" bigicon="$pluginurl/todo_large.png">
+		<language file="todo-Admin" />
+		<permissions name="view_todo_page" />
+		<select name="todo_verification">
+			<option value="none" name="todo_verification_none" />
+			<option value="guests" name="todo_verification_guests" />
+			<option value="everyone" name="todo_verification_everyone" />
+		</select>
+	</settings-page>
+	<actions>
+		<action action="todo" function="TodoMain" filename="Todo" />
+	</actions>
+	<hooks>
+		<function point="menu_items" function="todo_menu_items" filename="$plugindir/Todo" />
+		<provides>
+			<hook type="function">delete_todos</hook>
+			<hook type="function">delete_todo</hook>
+			<hook type="function">update_todo</hook>
+			<hook type="function">save_todo</hook>
+			<hook type="function">list_todos</hook>
+			<hook type="function">get_todos</hook>
+		</provides>
+	</hooks>
+	<database>
+		<tables>
+			<table if-exists="update" name="{db_prefix}todo">
+				<columns>
+					<column name="id_todo" type="bigint" autoincrement="yes" unsigned="yes" />
+					<column name="subject" type="varchar" size="80" />
+					<column name="poster_name" type="varchar" size="80" />
+					<column name="poster_time" type="int" unsigned="yes" />
+					<column name="id_member" type="mediumint" unsigned="yes" />
+					<column name="id_permission_set" type="smallint" unsigned="yes" />
+					<column name="priority" type="enum" values="'low','normal','high'" />
+					<column name="is_did" type="enum" values="'yes','no'" />
+					<column name="can_search" type="enum" values="'yes','no'" />
+				</columns>
+				<index type="primary">
+					<field>id_todo</field>
+				</index>
+				<index>
+					<field>id_member</field>
+					<field>is_did</field>
+				</index>
+			</table>
+			<table if-exists="update" name="{db_prefix}todo_permission_sets">
+				<columns>
+					<column name="id_permission_set" type="smallint" unsigned="yes" />
+					<column name="permission_set_name" type="varchar" size="80" />
+					<column name="id_group" type="smallint" unsigned="yes" />
+					<column name="id_member" type="mediumint" unsigned="yes" />
+					<column name="view_perm" type="enum" values="'allow','disallow','deny'" />
+					<column name="edit_perm" type="enum" values="'allow','disallow','deny'" />
+				</columns>
+				<index type="primary">
+					<field>id_permission_set</field>
+				</index>
+			</table>
+			<table if-exists="update" name="{db_prefix}todo_groups">
+				<columns>
+					<column name="id_todo" type="bigint" unsigned="yes" />
+					<column name="id_group" type="smallint" unsigned="yes" />
+					<column name="view_perm" type="enum" values="'allow','disallow','deny'" />
+					<column name="edit_perm" type="enum" values="'allow','disallow','deny'" />
+				</columns>
+				<index type="primary">
+					<field>id_todo</field>
+					<field>id_group</field>
+				</index>
+			</table>
+			<table if-exists="update" name="{db_prefix}todo_members">
+				<columns>
+					<column name="id_todo" type="bigint" unsigned="yes" />
+					<column name="id_member" type="smallint" unsigned="yes" />
+					<column name="view_perm" type="enum" values="'allow','disallow','deny'" />
+					<column name="edit_perm" type="enum" values="'allow','disallow','deny'" />
+				</columns>
+				<index type="primary">
+					<field>id_todo</field>
+					<field>id_member</field>
+				</index>
+			</table>
+		</tables>
+	</database>
+</plugin>

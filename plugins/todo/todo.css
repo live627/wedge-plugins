@@ -1,0 +1,48 @@
+
+.color_yes
+	color: green
+
+.color_no
+	color: red
+
+.sbox
+	.high
+		background: url($plugindir/priority_high.png) no-repeat 4px 3px
+		padding-left: 24px !important
+	.normal
+		background: url($plugindir/priority_normal.png) no-repeat 4px 3px
+		padding-left: 24px !important
+	.low
+		background: url($plugindir/priority_low.png) no-repeat 4px 3px
+		padding-left: 24px !important
+
+.cal
+	border: 1px solid #bbb
+	box-shadow: 2px 2px 6px 0 rgba(0,0,0, .15)
+	border-radius: 10px
+	background: #f7fcf7
+	display: none
+	padding: 0.5em
+	position: absolute
+	z-index: 999
+	.center
+		margin-bottom: 0.5em
+	.ui-datepicker-header a
+		margin-top: 5px
+	table
+		cell-padding, cell-spacing: 0
+		td
+			padding: 6px 8px
+		td.disabled
+			color: #aaa
+		td:not(.disabled)
+			border-radius: 3px
+			cursor: pointer
+			color: #300
+		td.hove
+			color: #000
+			background-color: rgba(0,0,0, .075)
+		td.today
+			color: #900
+		td.chosen
+			font-weight: bold
