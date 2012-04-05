@@ -249,9 +249,7 @@ function template_add_rule()
 
 	echo '
 	<form action="', $scripturl, '?action=pm;sa=manrules;save;in=', $context['in'], '" method="post" accept-charset="UTF-8" name="addrule" id="addrule" class="flow_hidden">
-		<div class="cat_bar">
-			<h3 class="catbg">', $context['in'] == 0 ? $txt['pm_add_rule'] : $txt['pm_edit_rule'], '</h3>
-		</div>
+		<we:cat>', $context['in'] == 0 ? $txt['pm_add_rule'] : $txt['pm_edit_rule'], '</we:cat>
 		<div class="roundframe">
 				<dl class="addrules">
 					<dt class="floatleft">

@@ -6,11 +6,10 @@ if (!defined('WEDGE'))
 
 function pm_ar_personal_message($recipients, $from_name, $subject, $message)
 {
-	global $context, $txt, $user_info;
+	global $context, $user_info;
 
 	if (isset($context['ar_pm']))
 		return;
-	loadPluginLanguage('live627:pm_ar', 'PMAutoResponder');
 
 	if (!empty($recipients['to']) || !empty($recipients['bcc']))
 	{
@@ -154,7 +153,7 @@ function PMAutoResponderGeneral($memID)
 		),
 	);
 
-	loadBlock('edit_options');
+	wetem::load('edit_options');
 	$context['profile_header_text'] = $txt['ar_pm_profile_area'];
 	$context['page_desc'] = $txt['ar_pm_profile_area'];
 	$context['profile_execute_on_save'] = array('ar_pm_profile_save');
@@ -186,7 +185,6 @@ function pm_ar_illegal_guest_perms()
 {
 	global $context;
 
-	loadPluginLanguage('live627:pm_ar', 'PMAutoResponder');
 	$context['non_guest_permissions'] = array_unshift($context['non_guest_permissions'],
 		'pm_ar'
 	);
@@ -227,7 +225,7 @@ function PMAutoResponderFilters($memID)
 
 	pm_ar_load_rules(false, $memID);
 	loadLanguage('PersonalMessage');
-	loadBlock('rules');
+	wetem::load('rules');
 
 	// Likely to need all the groups!
 	$request = wesql::query('
