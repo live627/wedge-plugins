@@ -54,8 +54,9 @@ function active_members_display_main()
 		$i++;
 	}
 
-	if (!empty($settings['activemembers_num']))
-		$context['active_members'][] = '<a href="#" onclick="reqWin(weUrl(\'action=activemembers;t=' . $topic. '\'), 500); return false;">' . $txt['more'] . '</a> (' . (count($active_members) - $settings['activemembers_num']) . ')';
+	$num_active_members = count($active_members);
+	if (!empty($settings['activemembers_num']) && $num_active_members > $settings['activemembers_num'])
+		$context['active_members'][] = '<a href="#" onclick="reqWin(weUrl(\'action=activemembers;t=' . $topic. '\'), 500); return false;">' . $txt['more'] . '</a> (' . ($num_active_members - $settings['activemembers_num']) . ')';
 }
 
 function active_members_cmp($a, $b)
