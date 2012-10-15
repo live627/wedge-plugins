@@ -6,7 +6,10 @@ if (!defined('WEDGE'))
 
 function active_members_display_main()
 {
-	global $active_members, $context, $settings, $topic, $txt;
+	global $active_members, $context, $settings, $topic, $txt, $topicinfo, $user_info;
+
+	if (!allowedTo('view_active_members_any') && ($topicinfo['id_member_started'] != $user_info['id'] || !allowedTo('view_active_members_own')))
+		return;
 
 	loadPluginLanguage('live627:active_members', 'ActiveMembers');
 	wetem::load('sidebar', 'display_active_members');
@@ -56,7 +59,7 @@ function active_members_display_main()
 
 	$num_active_members = count($active_members);
 	if (!empty($settings['activemembers_num']) && $num_active_members > $settings['activemembers_num'])
-		$context['active_members'][] = '<a href="#" onclick="reqWin(weUrl(\'action=activemembers;t=' . $topic. '\'), 500); return false;">' . $txt['more'] . '</a> (' . ($num_active_members - $settings['activemembers_num']) . ')';
+		$context['active_members'][] = '<a href="#" onclick="reqWin(weUrl(\'action=activemembers;topic=' . $topic. '\'), 500); return false;">' . $txt['more'] . '</a> (' . ($num_active_members - $settings['activemembers_num']) . ')';
 }
 
 function active_members_cmp($a, $b)
@@ -84,12 +87,12 @@ function template_display_active_members()
 
 function active_members_action()
 {
-	global $active_members, $context, $memberContext, $txt;
+	global $active_members, $context, $memberContext, $txt, $topic, $topicinfo, $user_info;
 
-	if (empty($_GET['t']))
+	if (empty($topic))
 		fatal_lang_error('no_access', false);
 
-	if (allowedTo('view_active_members'))
+	if (allowedTo('view_active_members_any') || ($topicinfo['id_member_started'] == $user_info['id'] && allowedTo('view_active_members_own')))
 	{
 		loadPluginLanguage('live627:active_members', 'ActiveMembers');
 
@@ -99,7 +102,7 @@ function active_members_action()
 				INNER JOIN {db_prefix}messages AS m ON (m.id_topic = t.id_topic)
 			WHERE t.id_topic = {int:topic}',
 			array(
-				'topic' => $_GET['t'],
+				'topic' => $topic,
 			)
 		);
 		$active_members = array();
@@ -116,7 +119,9 @@ function active_members_action()
 		uksort($context['active_members'], 'active_members_cmp');
 		loadMemberData(array_keys($active_members));
 
-		$context['help_text'] = '
+		$context['help_text'] = '<style><!--
+			#helf img { max-width: 40px; }
+		// --></style>
 		<table class="w100 cs3">';
 
 		foreach ($context['active_members'] as $member => $num)
