@@ -5,16 +5,14 @@ function pf_admin_areas()
 	global $txt, $admin_areas;
 
 	loadPluginLanguage('live627:post_fields', 'PostFields');
-	$admin_areas['plugins']['areas']['postfields'] = array(
+	$admin_areas['plugins']['areas']['postfields'] = array_merge($admin_areas['plugins']['areas']['postfields'], array(
 		'label' => $txt['post_fields'],
-		'icon' => 'settings.gif',
-		'bigicon' => 'custom_fields.png',
 		'function' => 'PostFields',
 		'subsections' => array(
 			'index' => array($txt['pf_menu_index']),
 			'edit' => array($txt['pf_menu_edit']),
 		),
-	);
+	));
 }
 
 function PostFields()
@@ -36,8 +34,6 @@ function PostFields()
 	// Default to sub action 'index'
 	if (!isset($_GET['sa']) || !isset($sub_actions[$_GET['sa']]))
 		$_GET['sa'] = 'index';
-
-	$context['sub_template'] = $_GET['sa'];
 
 	// This area is reserved for admins only - do this here since the menu code does not.
 	isAllowedTo('asmin_forum');

@@ -5,7 +5,6 @@
 	<description>Adds custom fields to posts. Configurable per board and memebergroup.</description>
 	<version>1.0</version>
 	<website>http://wedge.livemods.net/</website>
-	<acp-url>action=admin;area=postfields</acp-url>
 	<hooks>
 		<function point="post_form" function="pf_post_form" filename="$plugindir/PostFields" />
 		<function point="create_post_after" function="pf_after" filename="$plugindir/PostFields" />
@@ -69,4 +68,6 @@
 			</table>
 		</tables>
 	</database>
+	<settings-page area="postfields" icon="$pluginurl/form_small.png" bigicon="$pluginurl/form_large.png">
+	</settings-page>
 </plugin>

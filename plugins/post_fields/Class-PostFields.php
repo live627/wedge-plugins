@@ -11,7 +11,7 @@ interface postFields
 	 * @access public
 	 * @return void
 	 */
-	public function __construct($field, $value, $exists);
+	public function __construct($field, $value, $exists, $searching);
 
 	/*
 	 * Sets the input so the user can enter a value.
@@ -32,12 +32,14 @@ abstract class postFieldsBase implements postFields
 	protected $value;
 	protected $err;
 	protected $exists;
+	protected $searching;
 
-	public function __construct($field, $value, $exists)
+	public function __construct($field, $value, $exists, $searching = false)
 	{
 		$this->field = $field;
 		$this->value = $value;
 		$this->exists = $exists;
+		$this->searching = $searching;
 		$this->err = false;
 	}
 
@@ -113,7 +115,7 @@ class postFields_select extends postFieldsBase
 		foreach (explode(',', $this->field['options']) as $k => $v)
 		{
 			$true = (!$this->exists && $this->field['default_value'] == $v) || $this->value == $v;
-			$this->input_html .= '<option value="' . $k . '"' . ($true ? ' selected' : '') . '>' . $v . '</option>';
+			$this->input_html .= '<option' . ($true ? ' selected="selected"' : '') . '>' . $v . '</option>';
 			if ($true)
 				$this->output_html = $v;
 		}
@@ -124,20 +126,19 @@ class postFields_select extends postFieldsBase
 	{
 		global $txt;
 		$found = false;
-		$opts = explode(',', $this->field['options']);
+		$opts = array_flip(explode(',', $this->field['options']));
 		if (isset($this->value, $opts[$this->value]))
 			$found = true;
 
 		if (!$found)
-			$this->err = array('pf_invalid_value',
-			$this->field['name']);
+			$this->err = array('pf_invalid_value', $this->field['name']);
 	}
 	function getValue()
 	{
 		$value = $this->field['default_value'];
-		$opts = explode(',', $this->field['options']);
+		$opts = array_flip(explode(',', $this->field['options']));
 		if (isset($this->value, $opts[$this->value]))
-			$value = $opts[$this->value];
+			$value = $this->value;
 
 		return $value;
 	}
@@ -148,11 +149,10 @@ class postFields_radio extends postFieldsBase
 	function setHtml()
 	{
 		$this->input_html = '<fieldset>';
-		$opts = explode(',', $this->field['options']);
-		foreach ($opts as $k => $v)
+		foreach (explode(',', $this->field['options']) as $v)
 		{
 			$true = (!$this->exists && $this->field['default_value'] == $v) || $this->value == $v;
-			$this->input_html .= '<label><input type="radio" name="customfield[' . $this->field['id_field'] . ']" value="' . $k . '"' . ($true ? ' checked' : '') . '> ' . $v . '</label><br>';
+			$this->input_html .= '<label><input type="radio" name="customfield[' . $this->field['id_field'] . ']"' . ($true ? ' checked="checked"' : '') . '> ' . $v . '</label><br>';
 			if ($true)
 				$this->output_html = $v;
 		}
@@ -174,8 +174,22 @@ class postFields_text extends postFieldsBase
 {
 	function setHtml()
 	{
+		if ($this->searching)
+			switch ($this->field['mask'])
+			{
+				case 'number':
+				case 'float':
+					$this->input_html = 'Between <input type="number" name="customfield[' . $this->field['id_field'] . '][min]" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '"> and <input type="number" name="customfield[' . $this->field['id_field'] . '][max]" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '">';
+					break;
+
+				default:
+					$this->input_html = '<input type="text" name="customfield[' . $this->field['id_field'] . ']" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '">';
+					break;
+			}
+		else
+			$this->input_html = '<input type="text" name="customfield[' . $this->field['id_field'] . ']" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '">';
+
 		$this->output_html = $this->value;
-		$this->input_html = '<input type="text" name="customfield[' . $this->field['id_field'] . ']" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '">';
 	}
 	function validate()
 	{
@@ -184,9 +198,9 @@ class postFields_text extends postFieldsBase
 
 		$class_name = 'postFieldMask_' . $this->field['mask'];
 		if (!class_exists($class_name))
-			fatal_error('Param "' . $this->field['mask'] . '" not found', false);
+			fatal_error('Mask "' . $this->field['mask'] . '" not found for field "' . $this->field['name'] . '" at ID #' . $this->field['id_field'] . '.', false);
 
-		$mask = new $class_name($this->value, $this->field);
+		$mask = new $class_name($this->value, $this->field, $this->searching);
 		$mask->validate();
 		if (false !== ($err = $mask->getError()))
 			$this->err = $err;
@@ -210,7 +224,7 @@ class postFields_textarea extends postFieldsBase
 
 interface postFieldMask
 {
-	function __construct($value, $field);
+	function __construct($value, $field, $searching);
 	function validate();
 }
 
@@ -219,9 +233,11 @@ abstract class postFieldMaskBase implements postFieldMask
 	protected $value;
 	protected $field;
 	protected $err;
-	function __construct($value, $field)
+	protected $searching;
+	function __construct($value, $field, $searching)
 	{
 		$this->value = $value;
+		$this->searching = $searching;
 		$this->field = $field;
 		$this->err = false;
 	}
@@ -247,7 +263,7 @@ class postFieldMask_regex extends postFieldMaskBase
 	function validate()
 	{
 		global $txt;
-		if (!preg_match($this->value))
+		if (!preg_match($this->field['regex'], $this->value))
 			if (!empty($this->field['err']))
 				$this->err = $this->field['err'];
 			else
@@ -260,17 +276,43 @@ class postFieldMask_number extends postFieldMaskBase
 	function validate()
 	{
 		global $txt;
-		if (!preg_match('/^\s*([0-9]+)\s*$/', $this->value))
-			$this->err = array('pf_invalid_value', $this->field['name']);
+		if ($this->searching)
+		{
+			if (!preg_match('/^\s*([0-9]+)\s*$/', $this->value['min']))
+				$this->err = array('pf_invalid_value', $this->field['name']);
+			if (!preg_match('/^\s*([0-9]+)\s*$/', $this->value['max']))
+				$this->err = array('pf_invalid_value', $this->field['name']);
+		}
+		else
+			if (!preg_match('/^\s*([0-9]+)\s*$/', $this->value))
+				$this->err = array('pf_invalid_value', $this->field['name']);
 	}
 }
 
-class postFieldMask_float extends postFieldMaskBase
+class leagueFieldMask_float extends leagueFieldMaskBase
 {
 	function validate()
 	{
 		global $txt;
-		if (!preg_match('/^\s*([0-9]+(\.[0-9]+)?)\s*$/', $this->value))
+		if ($this->searching)
+		{
+			if (!preg_match('/^\s*([0-9]+(\.[0-9]+)?)\s*$/', $this->value['min']))
+				$this->err = array('pf_invalid_value', $this->field['name']);
+			if (!preg_match('/^\s*([0-9]+(\.[0-9]+)?)\s*$/', $this->value['max']))
+				$this->err = array('pf_invalid_value', $this->field['name']);
+		}
+		else
+			if (!preg_match('/^\s*([0-9]+(\.[0-9]+)?)\s*$/', $this->value))
+				$this->err = array('pf_invalid_value', $this->field['name']);
+	}
+}
+
+class leagueFieldMask_nohtml extends leagueFieldMaskBase
+{
+	function validate()
+	{
+		global $txt;
+		if (strip_tags($this->value) != $this->value)
 			$this->err = array('pf_invalid_value', $this->field['name']);
 	}
 }
