@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<plugin id="live627:max_img">
+	<name>Maximum Images Per Post</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Adds custom fields to posts. Configurable per board and memebergroup.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<hooks>
+		<function point="moderation_rules" function="max_img_moderation_rules" filename="$plugindir/MaxImages" />
+	</hooks>
+</plugin>
