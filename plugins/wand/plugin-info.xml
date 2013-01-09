@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<plugin id="live627:wand">
+	<name>Wand</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>A magic wand that populates the forum with dummy entries.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<acp-url>action=admin;area=wand</acp-url>
+	<hooks>
+		<function point="admin_areas" function="wand_admin_areas" filename="$plugindir/Wand" />
+	</hooks>
+</plugin>

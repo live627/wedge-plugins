@@ -1,0 +1,30 @@
+<?xml version="1.0" standalone="yes" ?>
+<plugin id="live627:passworded_boards">
+	<name>Passworded Boards</name>
+	<author>live627</author>
+	<description>Add passwords to boards</description>
+	<version>1.0</version>
+	<hooks>
+		<function point="pre_load" function="passworded_boards_pre_load" filename="$plugindir/PasswordedBoards" />
+		<function point="menu_items" function="passworded_boards_menu_items" filename="$plugindir/PasswordedBoards" />
+		<function point="messageindex_buttons" function="passworded_boards_messageindex_buttons" filename="$plugindir/PasswordedBoards" />
+		<function point="display_main" function="passworded_boards_display_main" filename="$plugindir/PasswordedBoards" />
+		<function point="admin_areas" function="passworded_boards_admin_areas" filename="$plugindir/PasswordedBoards" />
+	</hooks>
+	<database>
+		<tables>
+			<table if-exists="update" name="{db_prefix}passworded_boards">
+				<columns>
+					<column name="id_board" type="mediumint" unsigned="yes" />
+					<column name="password" type="varchar" size="1024" />
+					<column name="id_member" type="mediumint" unsigned="yes" default="0" />
+				</columns>
+				<index type="primary">
+					<field>id_board</field>
+				</index>
+			</table>
+		</tables>
+	</database>
+	<settings-page area="passworded_boards" icon="$pluginurl/password_small.png" bigicon="$pluginurl/password_large.png">
+	</settings-page>
+</plugin>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<plugin id="live627:monthly_stats">
+	<name>Monthly Statistics on Profile</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Automatically respond to incoming PMs.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<hooks>
+		<function point="profile_areas" function="monthly_stats_profile_areas" filename="$plugindir/PMAutoResponder" />
+	</hooks>
+</plugin>

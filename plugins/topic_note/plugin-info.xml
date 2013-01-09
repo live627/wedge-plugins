@@ -1,0 +1,56 @@
+<?xml version="1.0" standalone="yes" ?>
+<plugin id="live627:topic_notes">
+	<name>Topic Notes</name>
+	<author>live627</author>
+	<description>Add notes to topics</description>
+	<version>1.0</version>
+	<acp-url>action=admin;area=topicnotes</acp-url>
+	<readmes>
+		<readme lang="english">$plugindir/readme.english.txt</readme>
+	</readmes>
+	<newperms filename="TopicNotes-Admin">
+		<groups>
+			<group type="membergroup" class="topic_notes_group" simple="topic_notes_group" />
+		</groups>
+		<permissionlist>
+			<permission type="membergroup" name="topicnotes" ownany="true" classic="topic_notes_group" simple="topic_notes_group" />
+		</permissionlist>
+	</newperms>
+	<hooks>
+		<function point="post_form" function="topic_notes_post_form" filename="$plugindir/TopicNotes-Display" />
+		<function point="post_mod_actions" function="topic_notes_post_mod_actions" filename="$plugindir/TopicNotes-Display" />
+		<function point="create_post_after" function="topic_notes_after" filename="$plugindir/TopicNotes-Display" />
+		<function point="modify_post_after" function="topic_notes_after" filename="$plugindir/TopicNotes-Display" />
+		<function point="messageindex_buttons" function="topic_notes_messageindex_buttons" filename="$plugindir/TopicNotes-MessageIndex" />
+		<function point="display_main" function="topic_notes_display_main" filename="$plugindir/TopicNotes-Display" />
+		<function point="illegal_guest_perms" function="topic_notes_illegal_guest_perms" filename="$plugindir/TopicNotes-Permissions" />
+		<function point="moderation_rules" function="topic_notes_moderation_rules" filename="$plugindir/TopicNotes-Permissions" />
+	</hooks>
+	<database>
+		<tables>
+			<table if-exists="update" name="{db_prefix}topicnotes">
+				<columns>
+					<column name="id_topic" type="mediumint" unsigned="yes" />
+					<column name="note" type="varchar" size="1024" />
+					<column name="id_member" type="mediumint" unsigned="yes" default="0" />
+				</columns>
+				<index type="primary">
+					<field>id_topic</field>
+				</index>
+			</table>
+		</tables>
+	</database>
+	<settings>
+		<setting name="topicnotes_class" default="information" />
+		<setting name="topicnotes_boards" default="" />
+	</settings>
+	<settings-page area="topicnotes" icon="$pluginurl/note_small.png" bigicon="$pluginurl/note_large.png">
+		<language file="TopicNotes-Admin" />
+		<text name="topicnotes_class" />
+		<hr />
+		<permissions name="topicnotes_own" noguests="yes" />
+		<permissions name="topicnotes_any" noguests="yes" />
+		<hr />
+		<boards name="topicnotes_boards" />
+	</settings-page>
+</plugin>
