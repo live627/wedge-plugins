@@ -54,6 +54,10 @@ class Wand
 		$this->steps['topics']['current'] = 0;
 		$this->steps['messages']['max'] = 3000000;
 		$this->steps['messages']['current'] = 0;
+
+		// Allow plugins to add their own steps.
+		call_hook('wand_steps', array(&$this->steps));
+
 		$this->timeStart = microtime(true);
 
 		// Override defaults
