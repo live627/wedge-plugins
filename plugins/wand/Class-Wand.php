@@ -48,6 +48,8 @@ class Wand
 		$this->steps['boards']['current'] = 0;
 		$this->steps['members']['max'] = 150000;
 		$this->steps['members']['current'] = 0;
+		$this->steps['moderators']['max'] = 15000;
+		$this->steps['moderators']['current'] = 0;
 		$this->steps['topics']['max'] = 370000;
 		$this->steps['topics']['current'] = 0;
 		$this->steps['messages']['max'] = 3000000;
@@ -155,6 +157,26 @@ class Wand
 		}
 
 		$this->pause($i, 'members');
+	}
+
+	private function makeModerators($i)
+	{
+		$inserts = array();
+
+		while ($this->steps['moderators']['current'] < $this->steps['moderators']['max'] && $this->blockSize--)
+		{
+			$inserts[] = array(mt_rand(1, $this->steps['boards']['max']), mt_rand(1, $this->steps['members']['max']));
+			++$this->steps['moderators']['current'];
+		}
+
+		wesql::insert('ignore',
+			'{db_prefix}moderators',
+			array('id_board' => 'int', 'id_member' => 'int'),
+			$inserts,
+			array('id_board', 'id_member')
+		);
+
+		$this->pause($i, 'moderators');
 	}
 
 	private function makeMessages($i)

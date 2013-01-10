@@ -57,7 +57,7 @@ function template_wand2()
 			{
 				var t1 = new Date();
 
-				$.get(weUrl() + \'action=admin;area=wand;do;xml\', function (data) {
+				$.get(weUrl(\'action=admin;area=wand;do;xml\'), function (data) {
 					var
 						obj = $(\'lastsave\', data),
 						li = obj.attr(\'li\'),
