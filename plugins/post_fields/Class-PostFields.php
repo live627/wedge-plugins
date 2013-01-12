@@ -11,7 +11,7 @@ interface postFields
 	 * @access public
 	 * @return void
 	 */
-	public function __construct($field, $value, $exists, $searching);
+	public function __construct($field, $value, $exists, $searching = false);
 
 	/*
 	 * Sets the input so the user can enter a value.
@@ -289,7 +289,7 @@ class postFieldMask_number extends postFieldMaskBase
 	}
 }
 
-class leagueFieldMask_float extends leagueFieldMaskBase
+class postFieldMask_float extends postFieldMaskBase
 {
 	function validate()
 	{
@@ -307,7 +307,7 @@ class leagueFieldMask_float extends leagueFieldMaskBase
 	}
 }
 
-class leagueFieldMask_nohtml extends leagueFieldMaskBase
+class postFieldMask_nohtml extends postFieldMaskBase
 {
 	function validate()
 	{

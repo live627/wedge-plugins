@@ -180,7 +180,7 @@ function template_edit_post_field()
 						</dd>
 					</dl>
 				</fieldset>
-				<div class="righttext">
+				<div class="right">
 					<input type="submit" name="save" value="', $txt['save'], '" class="submit">';
 
 	if ($context['fid'])
@@ -198,13 +198,12 @@ function template_edit_post_field()
 
 	echo '
 		</form>
-	</div>
-	<br class="clear">';
+	</div>';
 }
 
 function template_input_post_fields()
 {
-	global $context, $scripturl, $settings, $txt, $user_info;
+	global $context, $scripturl, $settings, $txt;
 
 	if (!empty($context['fields']))
 	{
@@ -261,11 +260,11 @@ function template_input_post_fields()
 			}
 		],
 		oThemeOptions: {
-			bUseThemeSettings: ' . ($user_info['is_guest'] ? 'false' : 'true') . ',
+			bUseThemeSettings: ' . (we::$is_guest ? 'false' : 'true') . ',
 			sOptionName: \'postFields\'
 		},
 		oCookieOptions: {
-			bUseCookie: ' . ($user_info['is_guest'] ? 'true' : 'false') . ',
+			bUseCookie: ' . (we::$is_guest ? 'true' : 'false') . ',
 			sCookieName: \'postFields\'
 		}
 	});');

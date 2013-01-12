@@ -310,8 +310,6 @@ function total_getPostFields()
 
 function get_post_fields_filtered($board)
 {
-	global $user_info;
-
 	$fields = total_getPostFields();
 	$list = array();
 	foreach ($fields as $field)
@@ -321,7 +319,7 @@ function get_post_fields_filtered($board)
 			continue;
 
 		$group_list = explode(',', $field['groups']);
-		$is_allowed = array_intersect($user_info['groups'], $group_list);
+		$is_allowed = array_intersect(we::$user['groups'], $group_list);
 		if (empty($is_allowed))
 			continue;
 
@@ -594,7 +592,7 @@ function EditPostField()
 
 function pf_load_fields($fields)
 {
-	global $board, $context, $options, $user_info;
+	global $board, $context, $options;
 
 	$context['fields'] = array();
 	$value = '';
@@ -677,7 +675,7 @@ function rennder_field($field, $value, $exists)
 
 function pf_post_form()
 {
-	global $board, $context, $options, $theme, $user_info;
+	global $board, $context, $options, $theme;
 
 	pf_load_fields(get_post_fields_filtered($board));
 	if (!empty($context['fields']))
@@ -689,13 +687,13 @@ function pf_post_form()
 		$theme['live627:post_fields_url'] = $context['plugins_dir']['live627:post_fields'];
 		wetem::after('post_additional_options', 'input_post_fields');
 		add_plugin_js_file('live627:post_fields', 'postfields.js');
-		$context['is_post_fields_collapsed'] = $user_info['is_guest'] ? !empty($_COOKIE['postFields']) : !empty($options['postFields']);
+		$context['is_post_fields_collapsed'] = we::$is_guest ? !empty($_COOKIE['postFields']) : !empty($options['postFields']);
 	}
 }
 
 function pf_after(&$msgOptions)
 {
-	global $board, $context, $user_info, $theme;
+	global $board, $context, $theme;
 
 	$field_list = get_post_fields_filtered($board);
 	$changes = array();
@@ -722,7 +720,7 @@ function pf_after(&$msgOptions)
 
 function pf_post_post_validate(&$post_errors, &$posterIsGuest)
 {
-	global $board, $context, $user_info, $theme;
+	global $board, $context, $theme;
 
 	if (isset($_POST['customfield']))
 		$_POST['customfield'] = htmlspecialchars__recursive($_POST['customfield']);
@@ -747,7 +745,7 @@ function pf_post_post_validate(&$post_errors, &$posterIsGuest)
 
 function pf_display_message_list(&$messages, &$times, &$all_posters)
 {
-	global $board, $context, $options, $user_info;
+	global $board, $context, $options;
 
 	$field_list = get_post_fields_filtered($board);
 
