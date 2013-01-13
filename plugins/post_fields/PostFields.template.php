@@ -210,7 +210,7 @@ function template_input_post_fields()
 		$fold = !empty($context['is_post_fields_collapsed']);
 		echo '
 					<div id="postFieldsHeader">
-						<div id="postFieldsExpand" title="', $fold ? '+' : '-', '"></div> <strong><a href="#" id="postFieldsExpandLink">', $txt['post_fields'], '</a></strong>
+						<div id="postFieldsExpand"></div> <strong><a href="#" id="postFieldsExpandLink">', $txt['post_fields'], '</a></strong>
 					</div>
 					<div id="postFields" class="smalltext">
 						<dl class="settings">';
@@ -219,7 +219,7 @@ function template_input_post_fields()
 			echo '
 							<dt>
 								<strong>', $field['name'], ': </strong><br />
-								<span class="smalltext">', $field['description'], '</span>
+								<dfn>', $field['description'], '</dfn>
 							</dt>
 							<dd>
 								', $field['input_html'], '
@@ -241,9 +241,11 @@ function template_input_post_fields()
 	$("#postFieldsExpand").addClass("fold");');
 
 			add_js('
-	var oSwapAdditionalOptions = new weToggle({
-		bCurrentlyCollapsed: ', $fold ? 'true' : 'false', ',
-		aSwappableContainers: [
+	new weToggle({', $fold ? '
+		isCollapsed: true,' : '', '
+		onBeforeCollapse: function () { $("#additional_options").val("0"); },
+		onBeforeExpand: function () { $("#additional_options").val("1"); },
+		aSwapContainers: [
 			"postFields"
 		],
 		aSwapImages: [
@@ -258,15 +260,7 @@ function template_input_post_fields()
 				sId: "postFieldsExpandLink",
 				msgExpanded: ' . JavaScriptEscape($txt['post_fields']) . '
 			}
-		],
-		oThemeOptions: {
-			bUseThemeSettings: ' . (we::$is_guest ? 'false' : 'true') . ',
-			sOptionName: \'postFields\'
-		},
-		oCookieOptions: {
-			bUseCookie: ' . (we::$is_guest ? 'true' : 'false') . ',
-			sCookieName: \'postFields\'
-		}
+		]
 	});');
 		}
 	}

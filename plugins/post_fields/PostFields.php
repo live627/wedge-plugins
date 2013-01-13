@@ -682,7 +682,7 @@ function pf_post_form()
 	{
 		loadPluginLanguage('live627:post_fields', 'PostFields');
 		loadPluginTemplate('live627:post_fields', 'PostFields');
-		$context['css_main_files'][] = 'postfields';
+		$context['main_css_files']['postfields'] = false;
 		$context['skin_folders'][] = array($context['plugins_dir']['live627:post_fields'] . '/', 'live627:post_fields_');
 		$theme['live627:post_fields_url'] = $context['plugins_dir']['live627:post_fields'];
 		wetem::after('post_additional_options', 'input_post_fields');
