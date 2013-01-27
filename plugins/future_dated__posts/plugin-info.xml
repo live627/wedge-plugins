@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<plugin id="live627:future_dated_posts">
+	<name>Future Dated Posts</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Schedule posts to be published in the future.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<hooks>
+		<function point="enclose_post_field" function="fdp_enclose_post_field" filename="$plugindir/FutureDatedPosts" />
+	</hooks>
+</plugin>

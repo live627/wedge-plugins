@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<plugin id="live627:topic_prefix_tags">
+	<name>Topic Prefix Tags</name>
+	<author email="live627@gmail.com" url="http://livemods.net/">live627</author>
+	<description>Adds custom fields to posts. Configurable per board and memebergroup.</description>
+	<version>1.0</version>
+	<website>http://wedge.livemods.net/</website>
+	<hooks>
+		<function point="buffer" function="tpt_buffer" filename="$plugindir/TopicPrefixTags" />
+	</hooks>
+</plugin>
