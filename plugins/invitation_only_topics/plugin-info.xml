@@ -5,16 +5,32 @@
 	<description>Allows your members to restrict topics to those members they choose.</description>
 	<version>1.0</version>
 	<website>http://wedge.livemods.net/</website>
+	<settings>
+		<setting name="invitationtopics_inv_pm" default="1" />
+	</settings>
+	<settings-page area="invitationtopics" icon="$pluginurl/img/tick.png" bigicon="$pluginurl/img/tick_big.png">
+		<language file="InvitationTopics" />
+		<check name="invitationtopics_inv_pm" />
+		<check name="invitationtopics_kick_pm" />
+		<check name="invitationtopics_kick_reason" />
+		<check name="invitationtopics_kick_req_reason" />
+	</settings-page>
+	<newperms filename="InvitationTopics">
+		<permissionlist>
+			<permission type="board" name="invite_to_topic" ownany="true" classic="topic" simple="make_posts" />
+		</permissionlist>
+	</newperms>
 	<hooks>
 		<function point="post_form" function="invitation_only_topics_post_form" filename="$plugindir/InvitationTopics" />
+		<function point="post_post_validate" function="invitation_only_topics_post_post_validate" filename="$plugindir/InvitationTopics" />
 		<function point="create_post_after" function="invitation_only_topics_after" filename="$plugindir/InvitationTopics" />
 		<function point="modify_post_after" function="invitation_only_topics_after" filename="$plugindir/InvitationTopics" />
 		<function point="behavior" function="invitation_only_topics_extend_db_replacement" filename="$plugindir/InvitationTopics" />
 		<function point="ssi" function="invitation_only_topics_extend_db_replacement" filename="$plugindir/InvitationTopics" />
 		<function point="display_main" function="invitation_only_topics_display_main" filename="$plugindir/InvitationTopics" />
-		<function point="load_permissions" function="invitation_only_topics_load_permissions" filename="$plugindir/InvitationTopics" />
 		<function point="illegal_guest_perms" function="invitation_only_topics_illegal_guest_perms" filename="$plugindir/InvitationTopics" />
-		<language point="lang_help" function="invitation_only_topics_lang_help" filename="$plugindir/InvitationTopics" />
+		<language point="lang_help" filename="$plugindir/InvitationTopics" />
+		<language point="lang_modlog" filename="$plugindir/InvitationTopics" />
 	</hooks>
 	<database>
 		<tables>
@@ -38,4 +54,10 @@
 			<remove-clean>$plugindir/removeclean.php</remove-clean>
 		</scripts>
 	</database>
+	<readmes>
+		<readme lang="english">$plugindir/readme/readme.english.txt</readme>
+	</readmes>
+	<actions>
+		<action action="invitationtopics" function="invitation_only_topics_post_form_pre" filename="InvitationTopics" />
+	</actions>
 </plugin>

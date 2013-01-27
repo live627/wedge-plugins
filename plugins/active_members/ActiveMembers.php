@@ -6,9 +6,9 @@ if (!defined('WEDGE'))
 
 function active_members_display_main()
 {
-	global $active_members, $context, $settings, $topic, $txt, $topicinfo, $user_info;
+	global $active_members, $context, $settings, $topic, $txt, $topicinfo;
 
-	if (!allowedTo('view_active_members_any') && ($topicinfo['id_member_started'] != $user_info['id'] || !allowedTo('view_active_members_own')))
+	if (!allowedTo('view_active_members_any') && ($topicinfo['id_member_started'] != we::$id || !allowedTo('view_active_members_own')))
 		return;
 
 	loadPluginLanguage('live627:active_members', 'ActiveMembers');
@@ -87,12 +87,12 @@ function template_display_active_members()
 
 function active_members_action()
 {
-	global $active_members, $context, $memberContext, $txt, $topic, $topicinfo, $user_info;
+	global $active_members, $context, $memberContext, $txt, $topic, $topicinfo;
 
 	if (empty($topic))
 		fatal_lang_error('no_access', false);
 
-	if (allowedTo('view_active_members_any') || ($topicinfo['id_member_started'] == $user_info['id'] && allowedTo('view_active_members_own')))
+	if (allowedTo('view_active_members_any') || ($topicinfo['id_member_started'] == we::$id && allowedTo('view_active_members_own')))
 	{
 		loadPluginLanguage('live627:active_members', 'ActiveMembers');
 

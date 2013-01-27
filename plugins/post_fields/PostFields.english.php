@@ -47,6 +47,7 @@ $txt['pf_can_search'] = 'Searchable';
 $txt['pf_can_search_desc'] = 'Specifies if the fields can be searched.';
 $txt['pf_mask'] = 'Input Mask';
 $txt['pf_mask_desc'] = 'This validates the input supplied by the user.';
+$txt['pf_mask_nohtml'] = 'No HTML';
 $txt['pf_mask_number'] = 'Whole number|Scientific notation not allowed';
 $txt['pf_mask_float'] = 'Floating point integer|Decimals allowed';
 $txt['pf_mask_email'] = 'Email|Must be shorter than 255 characters';

@@ -602,12 +602,12 @@ function pf_load_fields($fields)
 	{
 		$request = wesql::query('
 			SELECT *
-				FROM {db_prefix}message_field_data
-				WHERE id_msg = {int:msg}
-					AND id_field IN ({array_int:field_list})',
-				array(
-					'msg' => (int) $_REQUEST['msg'],
-					'field_list' => array_keys($fields),
+			FROM {db_prefix}message_field_data
+			WHERE id_msg = {int:msg}
+				AND id_field IN ({array_int:field_list})',
+			array(
+				'msg' => (int) $_REQUEST['msg'],
+				'field_list' => array_keys($fields),
 			)
 		);
 		$values = array();
@@ -650,7 +650,7 @@ function rennder_field($field, $value, $exists)
 		$param->output_html = strtr($param->output_html, array("\n" => '<br>'));
 
 	// Enclosing the user input within some other text?
-	if (!empty($field['enclose']) && !empty($output_html))
+	if (!empty($field['enclose']))
 	{
 		$replacements = array(
 			'{SCRIPTURL}' => $scripturl,
@@ -728,7 +728,6 @@ function pf_post_post_validate(&$post_errors, &$posterIsGuest)
 	$field_list = get_post_fields_filtered($board);
 	loadPluginSource('live627:post_fields', 'Class-PostFields');
 	loadPluginLanguage('live627:post_fields', 'PostFields');
-			var_dump($err);
 	foreach ($field_list as $field)
 	{
 		$value = isset($_POST['customfield'][$field['id_field']]) ? $_POST['customfield'][$field['id_field']] : '';
@@ -754,12 +753,12 @@ function pf_display_message_list(&$messages, &$times, &$all_posters)
 
 	$request = wesql::query('
 		SELECT *
-			FROM {db_prefix}message_field_data
-			WHERE id_msg IN ({array_int:message_list})
-				AND id_field IN ({array_int:field_list})',
-			array(
-				'message_list' => $messages,
-				'field_list' => array_keys($field_list),
+		FROM {db_prefix}message_field_data
+		WHERE id_msg IN ({array_int:message_list})
+			AND id_field IN ({array_int:field_list})',
+		array(
+			'message_list' => $messages,
+			'field_list' => array_keys($field_list),
 		)
 	);
 	$context['fields'] = array();

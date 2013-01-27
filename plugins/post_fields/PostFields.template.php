@@ -150,6 +150,7 @@ function template_edit_post_field()
 						</dt>
 						<dd id="mask_dd">
 							<select name="mask" id="field_mask" onchange="updateInputBoxes2();">
+								<option value="nohtml"', $context['field']['type'] == 'nohtml' ? ' selected' : '', '>', $txt['pf_mask_nohtml'], '</option>
 								<option value="number"', $context['field']['type'] == 'number' ? ' selected' : '', '>', $txt['pf_mask_number'], '</option>
 								<option value="float"', $context['field']['type'] == 'float' ? ' selected' : '', '>', $txt['pf_mask_float'], '</option>
 								<option value="email"', $context['field']['type'] == 'email' ? ' selected' : '', '>', $txt['pf_mask_email'], '</option>

@@ -94,7 +94,7 @@ class postFields_check extends postFieldsBase
 	{
 		global $txt;
 		$true = (!$this->exists && $this->field['default_value']) || $this->value;
-		$this->input_html = '<input type="checkbox" name="customfield[' . $this->field['id_field'] . ']"' . ($true ? ' checked' : '') . '>';
+		$this->input_html = '<input type="checkbox" name="customfield[' . $this->field['id_field'] . ']"  id="customfield_' . $this->field['id_field'] . '"' . ($true ? ' checked' : '') . '>';
 		$this->output_html = $true ? $txt['yes'] : $txt['no'];
 	}
 	function validate()
@@ -111,11 +111,11 @@ class postFields_select extends postFieldsBase
 {
 	function setHtml()
 	{
-		$this->input_html = '<select name="customfield[' . $this->field['id_field'] . ']" class="pf_select" id="pf_select_' . $this->field['id_field'] . '"><option value="-1" disabled>[Select One]</option>';
+		$this->input_html = '<select name="customfield[' . $this->field['id_field'] . ']"  id="customfield_' . $this->field['id_field'] . '" class="pf_select" id="pf_select_' . $this->field['id_field'] . '"><option value="-1" disabled>[Select One]</option>';
 		foreach (explode(',', $this->field['options']) as $k => $v)
 		{
 			$true = (!$this->exists && $this->field['default_value'] == $v) || $this->value == $v;
-			$this->input_html .= '<option' . ($true ? ' selected="selected"' : '') . '>' . $v . '</option>';
+			$this->input_html .= '<option' . ($true ? ' selected="selected"' : '') . ' value="' . $v . '">' . (!empty($this->field['bbc']) ? westr::htmlspecialchars(parse_bbc($v)) : $v) . '</option>';
 			if ($true)
 				$this->output_html = $v;
 		}
@@ -152,7 +152,7 @@ class postFields_radio extends postFieldsBase
 		foreach (explode(',', $this->field['options']) as $v)
 		{
 			$true = (!$this->exists && $this->field['default_value'] == $v) || $this->value == $v;
-			$this->input_html .= '<label><input type="radio" name="customfield[' . $this->field['id_field'] . ']"' . ($true ? ' checked="checked"' : '') . '> ' . $v . '</label><br>';
+			$this->input_html .= '<label><input type="radio" name="customfield[' . $this->field['id_field'] . ']"  id="customfield_' . $this->field['id_field'] . '"' . ($true ? ' checked="checked"' : '') . '> ' . $v . '</label><br>';
 			if ($true)
 				$this->output_html = $v;
 		}
@@ -183,11 +183,11 @@ class postFields_text extends postFieldsBase
 					break;
 
 				default:
-					$this->input_html = '<input type="text" name="customfield[' . $this->field['id_field'] . ']" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '">';
+					$this->input_html = '<input type="text" name="customfield[' . $this->field['id_field'] . ']"  id="customfield_' . $this->field['id_field'] . '" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '">';
 					break;
 			}
 		else
-			$this->input_html = '<input type="text" name="customfield[' . $this->field['id_field'] . ']" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '">';
+			$this->input_html = '<input type="text" name="customfield[' . $this->field['id_field'] . ']"  id="customfield_' . $this->field['id_field'] . '" ' . ($this->field['size'] != 0 ? 'maxsize="' . $this->field['size'] . '"' : '') . ' size="' . ($this->field['size'] == 0 || $this->field['size'] >= 50 ? 50 : ($this->field['size'] > 30 ? 30 : ($this->field['size'] > 10 ? 20 : 10))) . '" value="' . $this->value . '">';
 
 		$this->output_html = $this->value;
 	}
@@ -213,7 +213,7 @@ class postFields_textarea extends postFieldsBase
 	{
 		$this->output_html = $this->value;
 		@list ($rows, $cols) = @explode(',', $this->field['default_value']);
-		$this->input_html = '<textarea name="customfield[' . $this->field['id_field'] . ']" ' . (!empty($rows) ? 'rows="' . $rows . '"' : '') . ' ' . (!empty($cols) ? 'cols="' . $cols . '"' : '') . '>' . $this->value . '</textarea>';
+		$this->input_html = '<textarea name="customfield[' . $this->field['id_field'] . ']"  id="customfield_' . $this->field['id_field'] . '" ' . (!empty($rows) ? 'rows="' . $rows . '"' : '') . ' ' . (!empty($cols) ? 'cols="' . $cols . '"' : '') . '>' . $this->value . '</textarea>';
 	}
 	function validate()
 	{
