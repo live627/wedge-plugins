@@ -9,9 +9,9 @@
 	color: red
 
 .sbox .overview > div:nth-child(2)
-	display: inline-block
+	display: inline-block !important
 	width: 60%
 
 .sbox .overview > div:nth-child(3)
-	display: inline-block
+	display: inline-block !important
 	width: 40%

@@ -178,7 +178,7 @@ function ListHooks()
 	loadPluginTemplate('live627:show_hooks', 'ShowHooks');
 	wetem::load('hooks');
 	call_hook('list_show_hooks', array(&$listOptions));
-	$context['css_main_files'][] = 'showhooks';
+	$context['main_css_files']['showhooks'] = true;
 	$context['skin_folders'][] = array($context['plugins_dir']['live627:show_hooks'] . '/', 'live627:show_hooks_');
 	$theme['live627:show_hooks_url'] = $context['plugins_dir']['live627:show_hooks'];
 }
@@ -215,7 +215,7 @@ function get_hooks_data($start, $per_page, $sort, $requested_plugin_id)
 					{
 						// We might be loading plugin files, we might not. This can't be set by add_hook, but by the hook manager.
 						if (!empty($fun[2]) && $fun[2] === 'plugin')
-							require_once($fun[1] . '.php');
+							include_once($fun[1] . '.php');
 						else
 							loadSource($fun[1]);
 					}

@@ -25,6 +25,9 @@ function template_hooks()
 		<we:title>', $context['plugin_details'][$enabled_plugin_name]['name'], '</we:title>
 		<div class="description">', $context['plugin_details'][$enabled_plugin_name]['description'], '</div>
 		', template_show_list('list_hooks_' . $enabled_plugin_name);
+
+	echo '
+	</div>';
 }
 
 ?>
