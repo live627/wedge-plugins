@@ -144,7 +144,7 @@
 					if ((min && thisDate < min) || (max && thisDate > max))
 						td.addClass('disabled');
 
-					td.appendTo(week).text(num).filter(':not(.disabled').data('date', thisDate).click(function (e)
+					td.appendTo(week).text(num).filter(':not(.disabled)').data('date', thisDate).click(function (e)
 					{
 						select($(this).data('date'), e);
 					}).mouseover(function()

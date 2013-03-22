@@ -8,7 +8,7 @@ function template_edit_todo()
 		<we:cat>
 			', $context['page_title'], '
 		</we:cat>
-		<form action="<URL>?action=todo;area=my;sa=edit" method="post" accept-charset="', $context['character_set'], '" name="todo_add">
+		<form action="<URL>?action=todo;area=my;sa=edit" method="post" accept-charset="UTF-8" name="todo_add">
 			<div class="windowbg2 wrc">';
 
 	if (!empty($context['post_errors']))
@@ -33,115 +33,41 @@ function template_edit_todo()
 							<strong>', $txt['todo_subject'], '</strong>
 						</dt>
 						<dd>
-							<input type="text" name="subject" value="" size="50" maxlength="255" class="input_text" />
+							<input type="text" name="subject" value="', $context['todo']['subject'], '" size="50" maxlength="255" />
 						</dd>
 						<dt>
 							<strong>', $txt['todo_due'], '</strong>
 						</dt>
 						<dd>
-							<input type="datetime" id="due" name="due" />
-						</dd>
-					<dt>
-						<strong>', $txt['permission_set'], ':</strong>
-						<dfn>', $context['can_manage_permission_sets'] ? sprintf($txt['permission_set_desc'], $scripturl . '?action=admin;area=permissions;sa=profiles;' . $context['session_query']) : strip_tags($txt['permission_set_desc']), '</dfn>
-					</dt>
-					<dd>
-						<select name="permission_set">';
+							<input type="datetime" id="due" name="due" value="', $context['todo']['due'], '" />
+						</dd>';
 
-	if (!$context['fid'])
-		echo '
-							<option value="-1">[', $txt['permission_sets_none'], ']</option>';
-
-	foreach ($context['permission_sets'] as $id_permission_set => $permission_set)
-		echo '
-							<option value="', $id_permission_set, '"', $id_permission_set == $context['todo']['permission_set'] ? ' selected' : '', '>', $permission_set['name'], '</option>';
-
-	echo '
-						</select>
-					</dd>
-					<dt>
-						<strong>', $txt['mboards_groups'], ':</strong>
-						<dfn>', $txt['mboards_groups_desc'], '</dfn>
-					</dt>
-					<dd>
-						<label><input type="checkbox" name="view_edit_same" id="view_edit_same"', !empty($context['view_edit_same']) ? ' checked' : '', ' onclick="$(\'#edit_perm_col\').toggle(!this.checked)"> ', $txt['mboards_groups_view_edit_same'], '</label><br>
-						<label><input type="checkbox" name="need_deny_perm" id="need_deny_perm"', !empty($context['need_deny_perm']) ? ' checked' : '', ' onclick="$(\'.deny_perm\').toggle(this.checked)"> ', $txt['mboards_groups_need_deny_perm'], '</label> <a href="<URL>?action=help;in=need_deny_perm" onclick="return reqWin(this);" class="help" title="', $txt['help'], '"></a><br>
-						<br>
-						<div id="view_perm_col" class="two-columns">
-							<fieldset>
-								<legend>', $txt['mboards_view_board'], '</legend>
-								<table>
-									<tr>
-										<th></th>
-										<th>', $txt['mboards_yes'], '</th>
-										<th>', $txt['mboards_no'], '</th>
-										<th class="deny_perm"', empty($context['need_deny_perm']) ? ' style="display:none"' : '', '>', $txt['mboards_never'], '</th>
-									</tr>';
-
-	foreach ($context['groups'] as $group)
+	if ($context['can_manage_permissions'])
 	{
-						echo '
-									<tr>
-										<td class="smalltext">
-											<span', $group['is_post_group'] ? ' class="post_group" title="' . $txt['mboards_groups_post_group'] . '"' : '', $group['id'] == 0 ? ' class="regular_members" title="' . $txt['mboards_groups_regular_members'] . '"' : '', '>
-												', $group['name'], '
-											</span>
-										</td>
-										<td>
-											<input type="radio" name="viewgroup[', $group['id'], ']" value="allow"', $group['view_perm'] == 'allow' ? ' checked' : '', '>
-										</td>
-										<td>
-											<input type="radio" name="viewgroup[', $group['id'], ']" value="disallow"', (empty($context['need_deny_perm']) && $group['view_perm'] == 'deny') || $group['view_perm'] == 'disallow' ? ' checked' : '', '>
-										</td>
-										<td class="deny_perm cedit"', empty($context['need_deny_perm']) ? ' style="display:none"' : '', '>
-											<input type="radio" name="viewgroup[', $group['id'], ']" value="deny"', !empty($context['need_deny_perm']) && $group['view_perm'] == 'deny' ? ' checked' : '', '>
-										</td>
-									</tr>';
+		echo '
+						<dt>
+							<strong>', $txt['todo_groups'], ':</strong>
+						</dt>
+						<dd>
+							<div class="information">
+								<label>
+									<input type="checkbox" onclick="invertAll(this, this.form);">
+									<span class="everyone" title="', $txt['mboards_groups_everyone_desc'], '">', $txt['mboards_groups_everyone'], '</span>
+								</label><br><br>';
+
+		foreach ($context['groups'] as $id_group => $group_link)
+			echo '
+								<label>
+									<input type="checkbox" name="groups[', $id_group, ']"', in_array($id_group, $context['todo']['groups']) ? ' checked' : '', '>
+									', $group_link, '
+								</label><br>';
+
+		echo '
+							</div>
+						</dd>';
 	}
 
 	echo '
-								</table>
-							</fieldset>
-						</div>
-						<div id="edit_perm_col" class="two-columns"', !empty($context['view_edit_same']) ? ' style="display:none"' : '', '>
-							<fieldset>
-								<legend>', $txt['mboards_edit_board'], '</legend>
-								<table>
-									<tr>
-										<th></th>
-										<th>', $txt['mboards_yes'], '</th>
-										<th>', $txt['mboards_no'], '</th>
-										<th class="deny_perm"', empty($context['need_deny_perm']) ? ' style="display:none;"' : '', '>', $txt['mboards_never'], '</th>
-									</tr>';
-
-	foreach ($context['groups'] as $group)
-	{
-						echo '
-									<tr>
-										<td class="smalltext">
-											<span', $group['is_post_group'] ? ' class="post_group" title="' . $txt['mboards_groups_post_group'] . '"' : '', $group['id'] == 0 ? ' class="regular_members" title="' . $txt['mboards_groups_regular_members'] . '"' : '', '>
-												', $group['name'], '
-											</span>
-										</td>
-										<td>
-											<input type="radio" name="editgroup[', $group['id'], ']" value="allow"', $group['edit_perm'] == 'allow' ? ' checked' : '', '>
-										</td>
-										<td>
-											<input type="radio" name="editgroup[', $group['id'], ']" value="disallow"', (empty($context['need_deny_perm']) && $group['edit_perm'] == 'deny') || $group['edit_perm'] == 'disallow' ? ' checked' : '', '>
-										</td>
-										<td class="deny_perm cedit"', empty($context['need_deny_perm']) ? ' style="display:none;"' : '', '>
-											<input type="radio" name="editgroup[', $group['id'], ']" value="deny"', !empty($context['need_deny_perm']) && $group['edit_perm'] == 'deny' ? ' checked' : '', '>
-										</td>
-									</tr>';
-	}
-
-	// Options to choose moderators, specify as announcement board and choose whether to count posts here.
-	echo '
-								</table>
-							</fieldset>
-						</div>
-						<br class="clear"><br>
-					</dd>
 					</dl>
 				</fieldset>
 				<fieldset>
@@ -149,7 +75,6 @@ function template_edit_todo()
 					<dl class="settings">
 						<dt id="priority_dt">
 							<strong>', $txt['todo_priority'], ':</strong>
-							<dfn>', $txt['todo_priority_desc'], '</dfn>
 						</dt>
 						<dd id="priority_dd">
 							<select name="priority">
@@ -174,7 +99,7 @@ function template_edit_todo()
 						</dd>
 					</dl>
 				</fieldset>
-				<div class="righttext">
+				<div class="right">
 					<input type="submit" name="save" value="', $txt['save'], '" class="submit">';
 
 	if ($context['fid'])

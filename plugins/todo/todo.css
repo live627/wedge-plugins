@@ -5,6 +5,10 @@
 .color_no
 	color: red
 
+span.post_group, span.regular_members, span.everyone
+	border-bottom: 1px dotted #000
+	cursor: help
+
 .sbox
 	.high
 		background: url($plugindir/priority_high.png) no-repeat 4px 3px
