@@ -18,7 +18,7 @@ function hooks_admin_areas()
 
 function ListHooks()
 {
-	global $context, $theme, $scripturl, $settings, $txt;
+	global $context, $theme, $settings, $txt;
 
 	populate_plugin_choices();
 	$plugins = get_hooks();
@@ -55,7 +55,7 @@ function ListHooks()
 			$list_options = array(
 				'id' => 'list_hooks_' . $enabled_plugin_name,
 				'items_per_page' => 50,
-				'base_href' => $scripturl . '?action=admin;area=hooks;' . $context['session_var'] . '=' . $context['session_id'],
+				'base_href' => '<URL>?action=admin;area=hooks;' . $context['session_var'] . '=' . $context['session_id'],
 				'default_sort_col' => 'hook_name',
 				'get_items' => array(
 					'function' => 'get_hooks_data',
@@ -132,7 +132,7 @@ function ListHooks()
 					),
 				),
 				'form' => array(
-					'href' => $scripturl . '?action=admin;area=hooks;' . $context['session_var'] . '=' . $context['session_id'],
+					'href' => '<URL>?action=admin;area=hooks;' . $context['session_var'] . '=' . $context['session_id'],
 				),
 				'additional_rows' => array(
 					array(
@@ -183,7 +183,7 @@ function ListHooks()
 	$theme['live627:show_hooks_url'] = $context['plugins_dir']['live627:show_hooks'];
 }
 
-function get_hooks_data($start, $per_page, $sort, $requested_plugin_id)
+function get_hooks_data($start, $items_per_page, $sort, $requested_plugin_id)
 {
 	global $context;
 
@@ -267,7 +267,7 @@ function get_hooks_data($start, $per_page, $sort, $requested_plugin_id)
 	{
 		if (++$counter < $start)
 			continue;
-		elseif ($counter == $start + $per_page)
+		elseif ($counter == $start + $items_per_page)
 			break;
 
 		$hooks_data[] = $data;
