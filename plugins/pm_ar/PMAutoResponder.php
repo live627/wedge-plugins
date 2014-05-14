@@ -6,7 +6,7 @@ if (!defined('WEDGE'))
 
 function pm_ar_personal_message($recipients, $from_name, $subject, $message)
 {
-	global $context, $user_info;
+	global $context;
 
 	if (isset($context['ar_pm']))
 		return;
@@ -44,15 +44,14 @@ function pm_ar_personal_message($recipients, $from_name, $subject, $message)
 			if (isset($theme_members[$id_member]['ar_pm_enabled'], $theme_members[$id_member]['ar_pm_subject'], $theme_members[$id_member]['ar_pm_body']))
 			{
 				$context['ar_pm'] = true;
-				pm_ar_apply_rules($id_member, $theme_members[$id_member]['ar_pm_subject'], $theme_members[$id_member]['ar_pm_body'], $theme_members[$id_member]['ar_pm_outbox']);
+				list ($theme_members[$id_member]['ar_pm_subject'], $theme_members[$id_member]['ar_pm_body']) = pm_ar_apply_rules($id_member, $subject, $message);
 				sendpm(
 					array(
-						'to' => array($user_info['id']),
+						'to' => array(MID),
 						'bcc' => array()
 					),
 					$theme_members[$id_member]['ar_pm_subject'],
 					$theme_members[$id_member]['ar_pm_body'],
-					!empty($theme_members[$id_member]['ar_pm_outbox']),
 					array(
 						'id' => $id_member,
 						'name' => $member['name'],
@@ -66,6 +65,7 @@ function pm_ar_personal_message($recipients, $from_name, $subject, $message)
 
 function pm_ar_profile_areas(&$profile_areas)
 {
+	global $context;
 	global $txt;
 
 	if (!allowedTo('pm_ar'))
@@ -87,6 +87,7 @@ function pm_ar_profile_areas(&$profile_areas)
 			'filters' => array($txt['ar_pm_filters']),
 		),
 	);
+	$context['profile_execute_on_save'] = array('ar_pm_profile_save');
 }
 
 function PMAutoResponderProfile($memID)
@@ -145,17 +146,14 @@ function PMAutoResponderGeneral($memID)
 			'type' => 'callback',
 			'callback_func' => 'ar_pm_body',
 		),
-		'ar_pm_outbox' => array(
-			'label' => $txt['ar_pm_outbox'],
-			'type' => 'check',
-			'input_attr' => '',
-			'value' => isset($cur_profile['options']['ar_pm_outbox']) ? $cur_profile['options']['ar_pm_outbox'] : '',
-		),
 	);
 
 	wetem::load('edit_options');
 	$context['profile_header_text'] = $txt['ar_pm_profile_area'];
 	$context['page_desc'] = $txt['ar_pm_profile_area'];
+	$context['profile_custom_submit_url'] = $scripturl . '?action=profile;area=' . $context['menu_item_selected'] . ';sa=general;u=' . $context['id_member'] . ';pmarsave';
+	if (isset($_GET['pmarsave']))
+		ar_pm_profile_save();
 	$context['profile_execute_on_save'] = array('ar_pm_profile_save');
 }
 
@@ -163,14 +161,12 @@ function ar_pm_profile_save()
 {
 	global $context;
 
-	$_POST['default_options'] = array(
-		'ar_pm_enabled',
-		'ar_pm_subject',
-		'ar_pm_body',
-		'ar_pm_outbox',
+	$_POST['options'] += array(
+		'ar_pm_enabled' => $_POST['ar_pm_enabled'],
+		'ar_pm_subject' => $_POST['ar_pm_subject']
 	);
 
-	makeThemeChanges($context['member'], 1);
+	makeThemeChanges($context['id_member']);
 }
 
 function pm_ar_load_permissions(&$permissionGroups, &$permissionList, &$leftPermissionGroups, &$hiddenPermissions, &$relabelPermissions)
@@ -221,11 +217,11 @@ function template_profile_ar_pm_body2()
 // List all rules, and allow adding/entering etc....
 function PMAutoResponderFilters($memID)
 {
-	global $txt, $context, $user_info, $scripturl;
+	global $txt, $context, $scripturl;
 
 	pm_ar_load_rules(false, $memID);
 	loadLanguage('PersonalMessage');
-	wetem::load('rules');
+	wetem::load('ar_rules');
 
 	// Likely to need all the groups!
 	$request = wesql::query('
@@ -237,7 +233,7 @@ function PMAutoResponderFilters($memID)
 			AND mg.hidden = {int:not_hidden}
 		ORDER BY mg.group_name',
 		array(
-			'current_member' => $user_info['id'],
+			'current_member' => MID,
 			'min_posts' => -1,
 			'moderator_group' => 3,
 			'not_hidden' => 0,
@@ -258,7 +254,7 @@ function PMAutoResponderFilters($memID)
 	if (isset($_GET['add']))
 	{
 		$context['in'] = isset($_GET['in']) && isset($context['rules'][$_GET['in']])? (int) $_GET['in'] : 0;
-		loadBlock('edit_options');
+		wetem::load('edit_options');
 
 		// Current rule information...
 		if ($context['in'])
@@ -292,7 +288,6 @@ function PMAutoResponderFilters($memID)
 				'criteria' => array(),
 				'subject' => '',
 				'message' => '',
-				'save_in_outbox' => 0,
 				'logic' => 'and',
 			);
 
@@ -318,13 +313,7 @@ function PMAutoResponderFilters($memID)
 			'body' => array(
 				'type' => 'callback',
 				'callback_func' => 'ar_pm_body2',
-			),
-			'save_in_outbox' => array(
-				'label' => $txt['ar_pm_outbox'],
-				'type' => 'check',
-				'input_attr' => '',
-				'value' => isset($context['rule']['save_in_outbox']) ? $context['rule']['save_in_outbox'] : '',
-			),
+			)
 		);
 		$context['profile_header_text'] = $txt['ar_pm_profile_area'];
 		$context['page_desc'] = $txt['ar_pm_profile_area'];
@@ -384,7 +373,6 @@ function PMAutoResponderFilters($memID)
 				$criteria[] = array('t' => $type, 'v' => westr::safe(trim($_POST['ruledef'][$ind])));
 		}
 		$is_or = $_POST['rule_logic'] == 'or' ? 'yes' : 'no';
-		$save_in_outbox = !empty($_POST['save_in_outbox']) ? 'yes' : 'no';
 
 		if (empty($criteria))
 			fatal_lang_error('pm_rule_no_criteria', false);
@@ -400,10 +388,10 @@ function PMAutoResponderFilters($memID)
 				'{db_prefix}pm_ar_rules',
 				array(
 					'id_member' => 'int', 'name' => 'string', 'criteria' => 'string',
-					'subject' => 'string', 'body' => 'string', 'save_in_outbox' => 'int', 'is_or' => 'string',
+					'subject' => 'string', 'body' => 'string', 'is_or' => 'string',
 				),
 				array(
-					$user_info['id'], $name, $criteria, $subject, $body, $save_in_outbox, $is_or,
+					MID, $name, $criteria, $subject, $body, $is_or,
 				),
 				array('id_rule')
 			);
@@ -411,18 +399,17 @@ function PMAutoResponderFilters($memID)
 			wesql::query('
 				UPDATE {db_prefix}pm_ar_rules
 				SET name = {string:name}, criteria = {string:criteria}, subject = {string:subject},
-					body = {string:body}, save_in_outbox = {string:save_in_outbox}, is_or = {string:is_or}
+					body = {string:body}, is_or = {string:is_or}
 				WHERE id_rule = {int:id_rule}
 					AND id_member = {int:current_member}',
 				array(
-					'current_member' => $user_info['id'],
+					'current_member' => MID,
 					'is_or' => $is_or,
 					'id_rule' => $context['in'],
 					'name' => $name,
 					'criteria' => $criteria,
 					'subject' => $subject,
 					'body' => $body,
-					'save_in_outbox' => $save_in_outbox,
 				)
 			);
 
@@ -442,7 +429,7 @@ function PMAutoResponderFilters($memID)
 				WHERE id_rule IN ({array_int:delete_list})
 					AND id_member = {int:current_member}',
 				array(
-					'current_member' => $user_info['id'],
+					'current_member' => MID,
 					'delete_list' => $delete_list,
 				)
 			);
@@ -451,11 +438,12 @@ function PMAutoResponderFilters($memID)
 	}
 }
 
-// This will apply rules to all unread messages. If all_messages is set will, clearly, do it to all!
-function pm_ar_apply_rules($id_member_from, &$subject, &$body, &$save_in_outbox)
+// This will apply rules to all unread messages.
+function pm_ar_apply_rules($id_member_from, &$subject, &$body)
 {
-	global $context, $user_info;
+	global $context;
 
+var_dump($id_member_from, $subject, $body);
 	// Want this - duh!
 	pm_ar_load_rules(false, $id_member_from);
 
@@ -469,7 +457,7 @@ function pm_ar_apply_rules($id_member_from, &$subject, &$body, &$save_in_outbox)
 		// Loop through all the criteria hoping to make a match.
 		foreach ($rule['criteria'] as $criterium)
 		{
-			if (($criterium['t'] == 'mid' && $criterium['v'] == $id_member_from) || ($criterium['t'] == 'gid' && in_array($criterium['v'], $user_info['groups'])) || ($criterium['t'] == 'sub' && strpos($subject, $criterium['v']) !== false) || ($criterium['t'] == 'msg' && strpos($body, $criterium['v']) !== false))
+			if (($criterium['t'] == 'mid' && $criterium['v'] == $id_member_from) || ($criterium['t'] == 'gid' && in_array($criterium['v'], we::$user['groups'])) || ($criterium['t'] == 'sub' && strpos($subject, $criterium['v']) !== false) || ($criterium['t'] == 'msg' && strpos($body, $criterium['v']) !== false))
 				$match = true;
 			// If we're adding and one criteria don't match then we stop!
 			elseif ($rule['logic'] == 'and')
@@ -484,7 +472,7 @@ function pm_ar_apply_rules($id_member_from, &$subject, &$body, &$save_in_outbox)
 		{
 			$subject = $rule['subject'];
 			$body = $rule['body'];
-			$save_in_outbox = $rule['save_in_outbox'];
+			return array($subject, $body);
 		}
 	}
 }
@@ -492,14 +480,14 @@ function pm_ar_apply_rules($id_member_from, &$subject, &$body, &$save_in_outbox)
 // Load up all the rules for the current user.
 function pm_ar_load_rules($reload = false, $id_member_from)
 {
-	global $user_info, $context;
+	global $context;
 
 	if (isset($context['rules']) && !$reload)
 		return;
 
 	$request = wesql::query('
 		SELECT
-			id_rule, name, criteria, subject, body, save_in_outbox, is_or
+			id_rule, name, criteria, subject, body, is_or
 		FROM {db_prefix}pm_ar_rules
 		WHERE id_member = {int:id_member_from}',
 		array(
@@ -507,7 +495,6 @@ function pm_ar_load_rules($reload = false, $id_member_from)
 		)
 	);
 	$context['rules'] = array();
-	// Simply fill in the data!
 	while ($row = wesql::fetch_assoc($request))
 		$context['rules'][$row['id_rule']] = array(
 			'id' => $row['id_rule'],
@@ -515,7 +502,6 @@ function pm_ar_load_rules($reload = false, $id_member_from)
 			'criteria' => unserialize($row['criteria']),
 			'subject' => $row['subject'],
 			'body' => $row['body'],
-			'save_in_outbox' => $row['save_in_outbox'] == 'yes',
 			'logic' => $row['is_or'] == 'yes' ? 'or' : 'and',
 		);
 
@@ -524,7 +510,7 @@ function pm_ar_load_rules($reload = false, $id_member_from)
 
 // Manage rules.
 // !!! TODO: Convert this to use the generic list.
-function template_rules()
+function template_ar_rules()
 {
 	global $context, $settings, $options, $txt, $scripturl;
 
